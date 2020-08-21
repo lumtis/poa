@@ -2,20 +2,30 @@ package poa
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/ltacker/poa/x/poa/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // InitGenesis initialize default parameters
 // and the keeper's address to pubkey map
-func InitGenesis(ctx sdk.Context, k Keeper /* TODO: Define what keepers the module needs */, data types.GenesisState) {
-	// TODO: Define logic for when you would like to initialize a new genesis
+func InitGenesis(ctx sdk.Context, k Keeper, data types.GenesisState) (res []abci.ValidatorUpdate) {
+	keeper.SetParams(ctx, data.Params)
+
+	// Set validators in the storage
+	for _, validator := range data.Validators {
+		keeper.SetValidator(ctx, validator)
+		keeper.SetValidatorByConsAddr(ctx, validator)
+	}
+
+	return keeper.ApplyAndReturnValidatorSetUpdates(ctx)
 }
 
 // ExportGenesis writes the current store values
 // to a genesis file, which can be imported again
 // with InitGenesis
 func ExportGenesis(ctx sdk.Context, k Keeper) (data GenesisState) {
-	// TODO: Define logic for exporting state
-	return types.NewGenesisState()
+	return types.GenesisState{
+		Params:     keeper.GetParams(ctx),
+		Validators: keeper.GetAllValidators(ctx),
+	}
 }
