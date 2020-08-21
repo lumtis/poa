@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// ParamSubspace defines the expected Subspace interfacace
+// ParamSubspace defines the expected Subspace interface
 type ParamSubspace interface {
 	WithKeyTable(table params.KeyTable) params.Subspace
 	Get(ctx sdk.Context, key []byte, ptr interface{})
@@ -13,12 +13,14 @@ type ParamSubspace interface {
 	SetParamSet(ctx sdk.Context, ps params.ParamSet)
 }
 
-/*
-When a module wishes to interact with another module, it is good practice to define what it will use
-as an interface so the module cannot use things that are not permitted.
-TODO: Create interfaces of what you expect the other keepers to have to be able to use this module.
-type BankKeeper interface {
-	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, error)
-	SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
+// AccountKeeper defines the expected account keeper (noalias)
+type AccountKeeper interface {
+	IterateAccounts(ctx sdk.Context, process func(authtypes.AccountI) (stop bool))
+	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
+
+	GetModuleAddress(name string) sdk.AccAddress
+	GetModuleAccount(ctx sdk.Context, moduleName string) authtypes.ModuleAccountI
+
+	// TODO remove with genesis 2-phases refactor https://github.com/cosmos/cosmos-sdk/issues/2862
+	SetModuleAccount(sdk.Context, authtypes.ModuleAccountI)
 }
-*/
