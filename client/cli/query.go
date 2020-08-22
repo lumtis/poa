@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ltacker/poa/x/poa/types"
 )
@@ -26,9 +27,9 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 	poaQueryCmd.AddCommand(
 		flags.GetCommands(
-			GetCmdQueryValidator(),
-			GetCmdQueryValidators(),
-			GetCmdQueryParams(),
+			GetCmdQueryValidator(queryRoute, cdc),
+			GetCmdQueryValidators(queryRoute, cdc),
+			GetCmdQueryParams(queryRoute, cdc),
 		)...,
 	)
 
@@ -51,11 +52,11 @@ func GetCmdQueryValidator(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			}
 
 			// We don't want pagination for cli queries
-			params := NewQueryValidatorParams(addr, 0, 100)
+			params := types.NewQueryValidatorParams(addr, 0, 100)
 
-			bz, err := clientCtx.JSONMarshaler.MarshalJSON(params)
-			if rest.CheckBadRequestError(w, err) {
-				return
+			bz, err := cdc.MarshalJSON(params)
+			if err != nil {
+				return err
 			}
 
 			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryValidator), bz)
@@ -81,11 +82,11 @@ func GetCmdQueryValidators(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			// We don't want pagination for cli queries
-			params := NewQueryValidatorsParams(0, 100)
+			params := types.NewQueryValidatorsParams(0, 100)
 
-			bz, err := clientCtx.JSONMarshaler.MarshalJSON(params)
-			if rest.CheckBadRequestError(w, err) {
-				return
+			bz, err := cdc.MarshalJSON(params)
+			if err != nil {
+				return err
 			}
 
 			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryValidators), bz)

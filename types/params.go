@@ -42,7 +42,7 @@ func (p Params) String() string {
 // ParamSetPairs - Implements params.ParamSet
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-		params.NewParamSetPair(KeyMaxValidators, &p.MaxValidators),
+		params.NewParamSetPair(KeyMaxValidators, &p.MaxValidators, func(value interface{}) error { return nil }),
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 
 // MaxValidators - Maximum number of validators
 func (k Keeper) MaxValidators(ctx sdk.Context) (res uint32) {
-	k.paramstore.Get(ctx, types.KeyMaxValidators, &res)
+	k.paramspace.Get(ctx, types.KeyMaxValidators, &res)
 	return
 }
 

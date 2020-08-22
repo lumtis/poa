@@ -1,10 +1,6 @@
 package types
 
-import (
-	"fmt"
-
-	"github.com/tendermint/tendermint/types"
-)
+import "fmt"
 
 // GenesisState - all poa state that must be provided at genesis
 type GenesisState struct {
@@ -37,7 +33,7 @@ func ValidateGenesis(data GenesisState) error {
 }
 
 // Validate the validator set in genesis
-func validateGenesisStateValidators(validators []types.Validator) (err error) {
+func validateGenesisStateValidators(validators []Validator) (err error) {
 	addrMap := make(map[string]bool, len(validators))
 
 	for i := 0; i < len(validators); i++ {

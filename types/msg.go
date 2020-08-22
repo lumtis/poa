@@ -2,7 +2,6 @@ package types
 
 import (
 	_ "github.com/cosmos/cosmos-sdk/types"
-	_ "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 /*

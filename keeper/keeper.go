@@ -39,7 +39,7 @@ func (k Keeper) Get(ctx sdk.Context, key string) (uint32, error) {
 	byteKey := []byte(key)
 	err := k.cdc.UnmarshalBinaryLengthPrefixed(store.Get(byteKey), &item)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	return item, nil
 }

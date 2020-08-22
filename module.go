@@ -15,6 +15,7 @@ import (
 	"github.com/ltacker/poa/x/poa/client/cli"
 	"github.com/ltacker/poa/x/poa/client/rest"
 	"github.com/ltacker/poa/x/poa/keeper"
+	types "github.com/ltacker/poa/x/poa/types"
 )
 
 // Type check to ensure the interface is properly implemented
@@ -28,7 +29,7 @@ type AppModuleBasic struct{}
 
 // Name returns the poa module's name.
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // RegisterCodec registers the poa module's types for the given codec.
@@ -64,7 +65,7 @@ func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 // GetQueryCmd returns no root query command for the poa module.
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetQueryCmd(StoreKey, cdc)
+	return cli.GetQueryCmd(types.StoreKey, cdc)
 }
 
 //____________________________________________________________________________
@@ -117,7 +118,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 // InitGenesis performs genesis initialization for the poa module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
+	var genesisState types.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.keeper, genesisState)
 	return []abci.ValidatorUpdate{}

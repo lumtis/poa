@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/types"
 )
 
 // Validator
@@ -27,29 +28,23 @@ func NewValidator(operator sdk.ValAddress, pubKey crypto.PubKey, description Des
 }
 
 // Get a ABCI validator update object from the validator
-func (v Validator) ABCIValidatorUpdate() abci.ValidatorUpdate {
-	pk, err := cryptoenc.PubKeyToProto(v.GetConsPubKey())
-	if err != nil {
-		panic(err)
-	}
-
+func (v Validator) ABCIValidatorUpdateAppend() abci.ValidatorUpdate {
 	return abci.ValidatorUpdate{
-		PubKey: pk,
+		PubKey: types.TM2PB.PubKey(v.GetConsPubKey()),
 		Power:  1, // Same weight for all the validators
 	}
 }
 
 // Get a ABCI validator update with no voting power from the validator
-func (v Validator) ABCIValidatorUpdateZero() abci.ValidatorUpdate {
-	pk, err := cryptoenc.PubKeyToProto(v.GetConsPubKey())
-	if err != nil {
-		panic(err)
-	}
-
+func (v Validator) ABCIValidatorUpdateRemove() abci.ValidatorUpdate {
 	return abci.ValidatorUpdate{
-		PubKey: pk,
+		PubKey: types.TM2PB.PubKey(v.GetConsPubKey()),
 		Power:  0,
 	}
+}
+
+func (v Validator) GetConsPubKey() crypto.PubKey {
+	return sdk.MustGetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, v.ConsensusPubkey)
 }
 
 // Description defines a validator description

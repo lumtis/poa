@@ -1,6 +1,9 @@
 package keeper
 
-import "github.com/cosmos/cosmos-sdk/x/staking/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ltacker/poa/x/poa/types"
+)
 
 // Get a validator
 func (k Keeper) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (validator types.Validator, found bool) {
