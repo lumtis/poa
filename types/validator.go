@@ -27,6 +27,18 @@ func NewValidator(operator sdk.ValAddress, pubKey crypto.PubKey, description Des
 	}
 }
 
+func (v Validator) GetOperator() sdk.ValAddress {
+	return v.OperatorAddress
+}
+
+func (v Validator) GetConsPubKey() crypto.PubKey {
+	return sdk.MustGetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, v.ConsensusPubkey)
+}
+
+func (v Validator) GetConsAddr() sdk.ConsAddress {
+	return sdk.ConsAddress(v.GetConsPubKey().Address())
+}
+
 // Get a ABCI validator update object from the validator
 func (v Validator) ABCIValidatorUpdateAppend() abci.ValidatorUpdate {
 	return abci.ValidatorUpdate{
@@ -41,18 +53,6 @@ func (v Validator) ABCIValidatorUpdateRemove() abci.ValidatorUpdate {
 		PubKey: types.TM2PB.PubKey(v.GetConsPubKey()),
 		Power:  0,
 	}
-}
-
-func (v Validator) GetOperator() sdk.ValAddress {
-	return v.OperatorAddress
-}
-
-func (v Validator) GetConsPubKey() crypto.PubKey {
-	return sdk.MustGetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, v.ConsensusPubkey)
-}
-
-func (v Validator) GetConsAddr() sdk.ConsAddress {
-	return sdk.ConsAddress(v.GetConsPubKey().Address())
 }
 
 // Description defines a validator description

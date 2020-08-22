@@ -16,6 +16,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data types.GenesisState) (res
 	for _, validator := range data.Validators {
 		keeper.SetValidator(ctx, validator)
 		keeper.SetValidatorByConsAddr(ctx, validator)
+		res = append(res, validator.ABCIValidatorUpdateAppend())
 	}
 
 	return []abci.ValidatorUpdate{} //keeper.ApplyAndReturnValidatorSetUpdates(ctx)
