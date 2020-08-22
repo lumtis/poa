@@ -43,8 +43,16 @@ func (v Validator) ABCIValidatorUpdateRemove() abci.ValidatorUpdate {
 	}
 }
 
+func (v Validator) GetOperator() sdk.ValAddress {
+	return v.OperatorAddress
+}
+
 func (v Validator) GetConsPubKey() crypto.PubKey {
 	return sdk.MustGetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, v.ConsensusPubkey)
+}
+
+func (v Validator) GetConsAddr() sdk.ConsAddress {
+	return sdk.ConsAddress(v.GetConsPubKey().Address())
 }
 
 // Description defines a validator description
