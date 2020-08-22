@@ -9,9 +9,9 @@ import (
 
 // Validator
 type Validator struct {
-	OperatorAddress sdk.ValAddress
-	ConsensusPubkey string
-	Description     Description
+	OperatorAddress sdk.ValAddress `json:"operator_address"`
+	ConsensusPubkey string         `json:"consensus_pubkey"`
+	Description     Description    `json:"description"`
 }
 
 func NewValidator(operator sdk.ValAddress, pubKey crypto.PubKey, description Description) Validator {

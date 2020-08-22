@@ -4,8 +4,8 @@ import "fmt"
 
 // GenesisState - all poa state that must be provided at genesis
 type GenesisState struct {
-	Params     Params
-	Validators []Validator
+	Params     Params      `json:"params"`
+	Validators []Validator `json:"validators"`
 }
 
 // NewGenesisState creates a new GenesisState object
