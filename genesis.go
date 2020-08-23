@@ -19,7 +19,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data types.GenesisState) (res
 		res = append(res, validator.ABCIValidatorUpdateAppend())
 	}
 
-	return []abci.ValidatorUpdate{} //keeper.ApplyAndReturnValidatorSetUpdates(ctx)
+	return res
 }
 
 // ExportGenesis writes the current store values
