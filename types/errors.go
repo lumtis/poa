@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	_ = sdkerrors.Register(ModuleName, 1, "custom error message")
+	ErrNoValidatorFound = sdkerrors.Register(ModuleName, 1, "no validator found")
 )
