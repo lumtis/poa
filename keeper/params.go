@@ -2,7 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ltacker/poa/x/poa/types"
+	"github.com/ltacker/poa/types"
 )
 
 // MaxValidators - Maximum number of validators

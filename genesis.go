@@ -2,8 +2,8 @@ package poa
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ltacker/poa/x/poa/keeper"
-	"github.com/ltacker/poa/x/poa/types"
+	"github.com/ltacker/poa/keeper"
+	"github.com/ltacker/poa/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 

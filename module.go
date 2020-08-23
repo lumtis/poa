@@ -12,10 +12,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/ltacker/poa/x/poa/client/cli"
-	"github.com/ltacker/poa/x/poa/client/rest"
-	"github.com/ltacker/poa/x/poa/keeper"
-	types "github.com/ltacker/poa/x/poa/types"
+	"github.com/ltacker/poa/client/cli"
+	"github.com/ltacker/poa/client/rest"
+	"github.com/ltacker/poa/keeper"
+	types "github.com/ltacker/poa/types"
 )
 
 // Type check to ensure the interface is properly implemented

@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ltacker/poa/x/poa/keeper"
-	"github.com/ltacker/poa/x/poa/types"
+	"github.com/ltacker/poa/keeper"
+	"github.com/ltacker/poa/types"
 )
 
 // NewHandler creates an sdk.Handler for all the poa type messages
