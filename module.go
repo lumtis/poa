@@ -15,7 +15,7 @@ import (
 	"github.com/ltacker/poa/client/cli"
 	"github.com/ltacker/poa/client/rest"
 	"github.com/ltacker/poa/keeper"
-	types "github.com/ltacker/poa/types"
+	"github.com/ltacker/poa/types"
 )
 
 // Type check to ensure the interface is properly implemented
@@ -112,7 +112,7 @@ func (AppModule) QuerierRoute() string {
 
 // NewQuerierHandler returns the poa module sdk.Querier.
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return types.NewQuerier(am.keeper)
+	return keeper.NewQuerier(am.keeper)
 }
 
 // InitGenesis performs genesis initialization for the poa module. It returns

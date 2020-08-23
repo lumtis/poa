@@ -13,12 +13,12 @@ import (
 // Keeper of the poa store
 type Keeper struct {
 	storeKey   sdk.StoreKey
-	cdc        *codec.Codec
+	cdc        codec.Codec
 	paramspace types.ParamSubspace
 }
 
 // NewKeeper creates a poa keeper
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramspace types.ParamSubspace) Keeper {
+func NewKeeper(cdc codec.Codec, key sdk.StoreKey, paramspace types.ParamSubspace) Keeper {
 	keeper := Keeper{
 		storeKey:   key,
 		cdc:        cdc,
