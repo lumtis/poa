@@ -77,11 +77,11 @@ func UnmarshalValidator(cdc *codec.Codec, value []byte) (v Validator, err error)
 
 // Description defines a validator description
 type Description struct {
-	Moniker         string
-	Identity        string
-	Website         string
-	SecurityContact string
-	Details         string
+	Moniker         string `json:"moniker"`
+	Identity        string `json:"identity"`
+	Website         string `json:"website"`
+	SecurityContact string `json:"security_contact"`
+	Details         string `json:"details"`
 }
 
 // Create a new Description
