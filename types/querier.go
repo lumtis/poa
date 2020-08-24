@@ -15,25 +15,12 @@ const (
 // - 'custom/poa/validator'
 type QueryValidatorParams struct {
 	ValidatorAddr sdk.ValAddress
-	Page, Limit   int
 }
 
-func NewQueryValidatorParams(validatorAddr sdk.ValAddress, page, limit int) QueryValidatorParams {
+func NewQueryValidatorParams(validatorAddr sdk.ValAddress) QueryValidatorParams {
 	return QueryValidatorParams{
 		ValidatorAddr: validatorAddr,
-		Page:          page,
-		Limit:         limit,
 	}
-}
-
-// Defines the params for the following queries:
-// - 'custom/poa/validators'
-type QueryValidatorsParams struct {
-	Page, Limit int
-}
-
-func NewQueryValidatorsParams(page, limit int) QueryValidatorsParams {
-	return QueryValidatorsParams{page, limit}
 }
 
 // /*

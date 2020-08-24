@@ -52,7 +52,7 @@ func GetCmdQueryValidator(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			}
 
 			// We don't want pagination for cli queries
-			params := types.NewQueryValidatorParams(addr, 0, 100)
+			params := types.NewQueryValidatorParams(addr)
 
 			bz, err := cdc.MarshalJSON(params)
 			if err != nil {
@@ -81,15 +81,7 @@ func GetCmdQueryValidators(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			// We don't want pagination for cli queries
-			params := types.NewQueryValidatorsParams(0, 100)
-
-			bz, err := cdc.MarshalJSON(params)
-			if err != nil {
-				return err
-			}
-
-			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryValidators), bz)
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryValidators), nil)
 			if err != nil {
 				fmt.Printf("could not resolve %s \n", types.QueryValidators)
 				return nil
