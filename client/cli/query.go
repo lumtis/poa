@@ -77,7 +77,7 @@ func GetCmdQueryValidators(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "validators",
 		Short: "Query all validators",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -106,8 +106,8 @@ func GetCmdQueryValidators(queryRoute string, cdc *codec.Codec) *cobra.Command {
 func GetCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "params",
-		Short: "Querythe params",
-		Args:  cobra.ExactArgs(1),
+		Short: "Query the params",
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
