@@ -57,11 +57,11 @@ func (v Validator) ABCIValidatorUpdateRemove() abci.ValidatorUpdate {
 }
 
 // Validator encoding functions
-func MustMarshalValidator(cdc codec.Codec, validator Validator) []byte {
+func MustMarshalValidator(cdc *codec.Codec, validator Validator) []byte {
 	return cdc.MustMarshalBinaryBare(&validator)
 }
 
-func MustUnmarshalValidator(cdc codec.Codec, value []byte) Validator {
+func MustUnmarshalValidator(cdc *codec.Codec, value []byte) Validator {
 	validator, err := UnmarshalValidator(cdc, value)
 	if err != nil {
 		panic(err)
@@ -70,7 +70,7 @@ func MustUnmarshalValidator(cdc codec.Codec, value []byte) Validator {
 	return validator
 }
 
-func UnmarshalValidator(cdc codec.Codec, value []byte) (v Validator, err error) {
+func UnmarshalValidator(cdc *codec.Codec, value []byte) (v Validator, err error) {
 	err = cdc.UnmarshalBinaryBare(value, &v)
 	return v, err
 }
