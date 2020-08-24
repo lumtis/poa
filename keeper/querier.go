@@ -3,7 +3,6 @@ package keeper
 import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -15,7 +14,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
 		switch path[0] {
 		case types.QueryValidators:
-			return queryValidators(ctx, req, k)
+			return queryValidators(ctx, k)
 
 		case types.QueryValidator:
 			return queryValidator(ctx, req, k)
@@ -29,24 +28,9 @@ func NewQuerier(k Keeper) sdk.Querier {
 	}
 }
 
-func queryValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, error) {
-	var params types.QueryValidatorsParams
-
-	// Unmarschal request
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
-	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
-	}
-
+func queryValidators(ctx sdk.Context, k Keeper) ([]byte, error) {
 	// Get all the validators
 	validators := k.GetAllValidators(ctx)
-
-	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
-	if start < 0 || end < 0 {
-		validators = []types.Validator{}
-	} else {
-		validators = validators[start:end]
-	}
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, validators)
 	if err != nil {
