@@ -1,13 +1,15 @@
 package keeper
-/*
-// TODO: Define if your module needs Parameters, if not this can be deleted
 
 import (
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ltacker/poa/x/poa/types"
+	"github.com/ltacker/poa/types"
 )
+
+// MaxValidators - Maximum number of validators
+func (k Keeper) MaxValidators(ctx sdk.Context) (res uint32) {
+	k.paramspace.Get(ctx, types.KeyMaxValidators, &res)
+	return
+}
 
 // GetParams returns the total set of poa parameters.
 func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
@@ -19,4 +21,3 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramspace.SetParamSet(ctx, &params)
 }
-*/

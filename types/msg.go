@@ -1,11 +1,9 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	_ "github.com/cosmos/cosmos-sdk/types"
 )
 
-// TODO: Describe your actions, these will implment the interface of `sdk.Msg`
 /*
 // verify interface at compile time
 var _ sdk.Msg = &Msg<Action>{}

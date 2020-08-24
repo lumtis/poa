@@ -8,14 +8,13 @@ import (
 
 // Default parameter namespace
 const (
-	DefaultParamspace = ModuleName
-	// TODO: Define your default parameters
+	// Default max number of validators
+	DefaultMaxValidators uint32 = 15
 )
 
 // Parameter store keys
 var (
-	// TODO: Define your keys for the parameter store
-	// KeyParamName          = []byte("ParamName")
+	KeyMaxValidators = []byte("MaxValidators")
 )
 
 // ParamKeyTable for poa module
@@ -25,33 +24,51 @@ func ParamKeyTable() params.KeyTable {
 
 // Params - used for initializing default parameter for poa at genesis
 type Params struct {
-	// TODO: Add your Paramaters to the Paramter struct
-	// KeyParamName string `json:"key_param_name"`
+	MaxValidators uint32
 }
 
 // NewParams creates a new Params object
-func NewParams(/* TODO: Pass in the paramters*/) Params {
+func NewParams(maxValidators uint32) Params {
 	return Params{
-		// TODO: Create your Params Type
+		MaxValidators: maxValidators,
 	}
 }
 
 // String implements the stringer interface for Params
 func (p Params) String() string {
-	return fmt.Sprintf(`
-	// TODO: Return all the params as a string
-	`, )
+	return fmt.Sprintf("%d", p.MaxValidators)
 }
 
 // ParamSetPairs - Implements params.ParamSet
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-		// TODO: Pair your key with the param
-		// params.NewParamSetPair(KeyParamName, &p.ParamName),
+		params.NewParamSetPair(KeyMaxValidators, &p.MaxValidators, validateMaxValidators),
 	}
 }
 
 // DefaultParams defines the parameters for this module
 func DefaultParams() Params {
-	return NewParams( /* TODO: Pass in your default Params */ )
+	return NewParams(DefaultMaxValidators)
+}
+
+// Validate a set of params
+func (p Params) Validate() error {
+	if err := validateMaxValidators(p.MaxValidators); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Validate maxValidators param
+func validateMaxValidators(i interface{}) error {
+	v, ok := i.(uint32)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v == 0 {
+		return fmt.Errorf("max validators must be positive: %d", v)
+	}
+
+	return nil
 }

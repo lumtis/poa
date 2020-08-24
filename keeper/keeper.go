@@ -3,12 +3,11 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ltacker/poa/x/poa/types"
+	"github.com/ltacker/poa/types"
 )
 
 // Keeper of the poa store
@@ -34,18 +33,18 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // Get returns the pubkey from the adddress-pubkey relation
-func (k Keeper) Get(ctx sdk.Context, key string) (/* TODO: Fill out this type */, error) {
+func (k Keeper) Get(ctx sdk.Context, key string) (uint32, error) {
 	store := ctx.KVStore(k.storeKey)
-	var item /* TODO: Fill out this type */
+	var item uint32
 	byteKey := []byte(key)
 	err := k.cdc.UnmarshalBinaryLengthPrefixed(store.Get(byteKey), &item)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	return item, nil
 }
 
-func (k Keeper) set(ctx sdk.Context, key string, value /* TODO: fill out this type */ ) {
+func (k Keeper) set(ctx sdk.Context, key string, value uint32) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(value)
 	store.Set([]byte(key), bz)

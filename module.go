@@ -12,15 +12,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/ltacker/poa/x/poa/client/cli"
-	"github.com/ltacker/poa/x/poa/client/rest"
-	"github.com/ltacker/poa/x/poa/keeper"
+	"github.com/ltacker/poa/client/cli"
+	"github.com/ltacker/poa/client/rest"
+	"github.com/ltacker/poa/keeper"
+	"github.com/ltacker/poa/types"
 )
 
 // Type check to ensure the interface is properly implemented
 var (
-	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // AppModuleBasic defines the basic application module used by the poa module.
@@ -28,7 +29,7 @@ type AppModuleBasic struct{}
 
 // Name returns the poa module's name.
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // RegisterCodec registers the poa module's types for the given codec.
@@ -64,7 +65,7 @@ func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 // GetQueryCmd returns no root query command for the poa module.
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetQueryCmd(StoreKey, cdc)
+	return cli.GetQueryCmd(types.StoreKey, cdc)
 }
 
 //____________________________________________________________________________
@@ -74,15 +75,15 @@ type AppModule struct {
 	AppModuleBasic
 
 	keeper        keeper.Keeper
-	// TODO: Add keepers that your application depends on
+	accountKeeper types.AccountKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(k keeper.Keeper, /*TODO: Add Keepers that your application depends on*/) AppModule {
+func NewAppModule(k keeper.Keeper, ak types.AccountKeeper) AppModule {
 	return AppModule{
-		AppModuleBasic:      AppModuleBasic{},
-		keeper:              k,
-		// TODO: Add keepers that your application depends on
+		AppModuleBasic: AppModuleBasic{},
+		keeper:         k,
+		accountKeeper:  ak,
 	}
 }
 
@@ -111,16 +112,15 @@ func (AppModule) QuerierRoute() string {
 
 // NewQuerierHandler returns the poa module sdk.Querier.
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return types.NewQuerier(am.keeper)
+	return keeper.NewQuerier(am.keeper)
 }
 
 // InitGenesis performs genesis initialization for the poa module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
+	var genesisState types.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	InitGenesis(ctx, am.keeper, genesisState)
-	return []abci.ValidatorUpdate{}
+	return InitGenesis(ctx, am.keeper, genesisState)
 }
 
 // ExportGenesis returns the exported genesis state as raw bytes for the poa
@@ -137,6 +137,6 @@ func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
 
 // EndBlock returns the end blocker for the poa module. It returns no validator
 // updates.
-func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return EndBlocker(ctx, am.keeper)
 }

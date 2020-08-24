@@ -6,7 +6,7 @@ import (
 
 // RegisterCodec registers concrete types on codec
 func RegisterCodec(cdc *codec.Codec) {
-	// TODO: Register the modules msgs
+	// TODO: Register the modules future msgs
 }
 
 // ModuleCdc defines the module codec
