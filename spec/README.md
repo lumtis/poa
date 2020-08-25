@@ -11,9 +11,14 @@ parent:
 
 The module enables a Cosmos-SDK based blockchain to use a Proof of Authority system to determine the validator set.
 
-All validators in the system has an equal voting power.
+All validators in the system have equal voting power.
 
-Currently, this system allows a single master to arbitrarily and dynamically determine the effective validator set for the system. I plan implement a set of several masters with the MultSig interface to manage the validator set.
+An initial validator set is defined in the genesis file.
+Validators can be appended or kicked from the validator set through voting from the current validators.
+
+A quorum percentage is defined in the parameters of the module. This quorum defines the number of approvals required to vote decision.
+
+For example: if the quorum is 50% and the current validator set contains 10 validators. 5 validator approvals are required to accept a new candidate in the validator set.
 
 ## Contents
 
