@@ -35,3 +35,9 @@ func FlagSetDescriptionCreate() *flag.FlagSet {
 
 	return fs
 }
+
+func FlagSetPubKey() *flag.FlagSet {
+	fs := flag.NewFlagSet("", flag.ContinueOnError)
+	fs.String(FlagPubKey, "", "The Bech32 encoded PubKey of the validator")
+	return fs
+}

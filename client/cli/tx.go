@@ -82,6 +82,7 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 	}
 
 	cmd.Flags().AddFlagSet(FlagSetDescriptionCreate())
+	cmd.Flags().AddFlagSet(FlagSetPubKey())
 	_ = cmd.MarkFlagRequired(FlagPubKey)
 
 	return cmd
