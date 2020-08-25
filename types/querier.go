@@ -6,9 +6,10 @@ import (
 
 // Query endpoints supported by the poa querier
 const (
-	QueryValidators = "validators"
-	QueryValidator  = "validator"
-	QueryParams     = "params"
+	QueryValidators   = "validators"
+	QueryValidator    = "validator"
+	QueryParams       = "params"
+	QueryApplications = "applications"
 )
 
 // Defines the params for the following queries:
