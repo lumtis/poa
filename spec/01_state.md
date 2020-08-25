@@ -83,7 +83,3 @@ The kick proposal pool tracks all the current propositions to kick a validator. 
 - KickProposalPool: `0x25 | OperatorAddr -> amino(vote)`
 
 An application is stored in a `Vote` structure to track the current state of the vote like the current number of approvals. The subject field represents the validator to be eventually kicked.
-
-## RejectedApplication
-
-## KickedValidator
