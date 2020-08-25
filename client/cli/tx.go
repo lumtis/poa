@@ -44,7 +44,7 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 
 			// Operator address is the sender
-			opAddress := sdk.ValAddress(cliCtx.FromAddress)
+			opAddress := sdk.ValAddress(cliCtx.GetFromAddress())
 
 			// Consensus public key for the validator
 			pkStr, _ := cmd.Flags().GetString(FlagPubKey)
