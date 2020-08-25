@@ -3,6 +3,7 @@ package types
 import (
 	"math"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -95,4 +96,21 @@ func (v Vote) CheckQuorum(voterPoolSize uint64, quorum uint64) (reached bool, ap
 		// The vote can't be approved anymore, therefore the quorum has been reached to reject the proposition
 		return true, false, nil
 	}
+}
+
+// Vote encoding functions
+func MustMarshalVote(cdc *codec.Codec, v Vote) []byte {
+	return cdc.MustMarshalBinaryBare(&v)
+}
+func MustUnmarshalVote(cdc *codec.Codec, value []byte) Vote {
+	vote, err := UnmarshalVote(cdc, value)
+	if err != nil {
+		panic(err)
+	}
+
+	return vote
+}
+func UnmarshalVote(cdc *codec.Codec, value []byte) (v Vote, err error) {
+	err = cdc.UnmarshalBinaryBare(value, &v)
+	return v, err
 }

@@ -9,4 +9,5 @@ var (
 	ErrInvalidValidator     = sdkerrors.Register(ModuleName, 2, "invalid validator")
 	ErrInvalidQuorumValue   = sdkerrors.Register(ModuleName, 3, "quorum should be a percentage")
 	ErrInvalidVoterPoolSize = sdkerrors.Register(ModuleName, 4, "the voter pool size is incorrect")
+	ErrAlreadyApplying      = sdkerrors.Register(ModuleName, 5, "the candidate is already applying to become a validator")
 )

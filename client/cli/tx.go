@@ -1,13 +1,18 @@
 package cli
 
 import (
+	"bufio"
 	"fmt"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"github.com/ltacker/poa/types"
 )
 
@@ -22,33 +27,54 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	poaTxCmd.AddCommand(flags.PostCommands(
-	// TODO: Add tx based commands
-	// GetCmd<Action>(cdc)
+		GetCmdSubmitApplication(cdc),
 	)...)
 
 	return poaTxCmd
 }
 
-// Example:
-//
-// GetCmd<Action> is the CLI command for doing <Action>
-// func GetCmd<Action>(cdc *codec.Codec) *cobra.Command {
-// 	return &cobra.Command{
-// 		Use:   "/* Describe your action cmd */",
-// 		Short: "/* Provide a short description on the cmd */",
-// 		Args:  cobra.ExactArgs(2), // Does your request require arguments
-// 		RunE: func(cmd *cobra.Command, args []string) error {
-// 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-// 			inBuf := bufio.NewReader(cmd.InOrStdin())
-// 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+// GetCmdSubmitApplication sends a new application to become a validator
+func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "apply",
+		Short: "Apply to become a new validator in the network",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 
-// 			msg := types.NewMsg<Action>(/* Action params */)
-// 			err = msg.ValidateBasic()
-// 			if err != nil {
-// 				return err
-// 			}
+			// Operator address is the sender
+			opAddress := sdk.ValAddress(cliCtx.FromAddress)
 
-// 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
-// 		},
-// 	}
-// }
+			// Consensus public key for the validator
+			pkStr, _ := cmd.Flags().GetString(FlagPubKey)
+			pk, err := sdk.GetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, pkStr)
+			if err != nil {
+				return err
+			}
+
+			// Description of the candidate
+			moniker, _ := cmd.Flags().GetString(FlagMoniker)
+			identity, _ := cmd.Flags().GetString(FlagIdentity)
+			website, _ := cmd.Flags().GetString(FlagWebsite)
+			security, _ := cmd.Flags().GetString(FlagSecurityContact)
+			details, _ := cmd.Flags().GetString(FlagDetails)
+			description := types.NewDescription(moniker, identity, website, security, details)
+
+			candidateValidator := types.NewValidator(opAddress, pk, description)
+
+			msg := types.NewMsgSubmitApplication(candidateValidator)
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+
+	cmd.Flags().AddFlagSet(FlagSetDescriptionCreate())
+	_ = cmd.MarkFlagRequired(FlagPubKey)
+
+	return cmd
+}
