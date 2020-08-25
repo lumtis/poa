@@ -44,13 +44,21 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 
 			// Operator address is the sender
-			opAddress := sdk.ValAddress(cliCtx.GetFromAddress())
+			accAddress := cliCtx.GetFromAddress()
+			if accAddress.Empty() {
+				return fmt.Errorf("Account address empty")
+			}
+
+			opAddress := sdk.ValAddress(accAddress)
 
 			// Consensus public key for the validator
-			pkStr, _ := cmd.Flags().GetString(FlagPubKey)
+			pkStr, err := cmd.Flags().GetString(FlagPubKey)
+			if err != nil {
+				return fmt.Errorf("Cannot get pubkey flag: %v", err)
+			}
 			pk, err := sdk.GetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, pkStr)
 			if err != nil {
-				return err
+				return fmt.Errorf("Cannot convert pubkey: %v", err)
 			}
 
 			// Description of the candidate
