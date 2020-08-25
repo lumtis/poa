@@ -2,11 +2,12 @@ package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
 )
 
 // RegisterCodec registers concrete types on codec
 func RegisterCodec(cdc *codec.Codec) {
-	// TODO: Register the modules future msgs
+	cdc.RegisterConcrete(types.MsgSubmitProposal{}, "poa/MsgSubmitProposal", nil)
 }
 
 // ModuleCdc defines the module codec
