@@ -11,4 +11,5 @@ var (
 	ErrInvalidVoterPoolSize = sdkerrors.Register(ModuleName, 4, "the voter pool size is incorrect")
 	ErrAlreadyApplying      = sdkerrors.Register(ModuleName, 5, "the candidate is already applying to become a validator")
 	ErrAlreadyValidator     = sdkerrors.Register(ModuleName, 6, "the candidate is already a validator")
+	ErrMaxValidatorsReached = sdkerrors.Register(ModuleName, 7, "the maximum number of validators has been reached")
 )

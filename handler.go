@@ -25,6 +25,13 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 
 // handleMsgSubmitApplication create a new application to become a validator
 func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgSubmitApplication) (*sdk.Result, error) {
+	// Check max validator is not reached
+	allValidators := k.GetAllValidators(ctx)
+	maxValidator := k.MaxValidators(ctx)
+	if uint16(len(allValidators)) == maxValidator {
+		return nil, types.ErrMaxValidatorsReached
+	}
+
 	// Candidate should not be already applying
 	_, found := k.GetApplication(ctx, msg.Candidate.GetOperator())
 	if found {
