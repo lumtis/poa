@@ -36,7 +36,7 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 	}
 
 	// Candidate should not be a validator
-	_, found := k.GetValidator(ctx, msg.Candidate.GetOperator())
+	_, found = k.GetValidator(ctx, msg.Candidate.GetOperator())
 	if found {
 		return nil, types.ErrAlreadyValidator
 	}
