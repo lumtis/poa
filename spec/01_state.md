@@ -4,12 +4,6 @@ order: 1
 
 # State
 
-## ValidatorNumber
-
-ValidatorNumber tracks the total number of validators (since 1 validator = 1 weight) recorded during the previous end block.
-
-- ValidatorNumber: `0x12 -> amino(sdk.Int)`
-
 ## Params
 
 Params is a module-wide configuration structure that stores system parameters
