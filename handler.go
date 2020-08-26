@@ -31,19 +31,8 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 	if uint16(len(allValidators)) == maxValidator {
 		return nil, types.ErrMaxValidatorsReached
 	}
-
-	// Candidate should not be already applying
-	_, found := k.GetApplication(ctx, msg.Candidate.GetOperator())
-	if found {
-		return nil, types.ErrAlreadyApplying
-	}
-	_, found = k.GetApplicationByConsAddr(ctx, msg.Candidate.GetConsAddr())
-	if found {
-		return nil, types.ErrAlreadyApplying
-	}
-
 	// Candidate should not be a validator
-	_, found = k.GetValidator(ctx, msg.Candidate.GetOperator())
+	_, found := k.GetValidator(ctx, msg.Candidate.GetOperator())
 	if found {
 		return nil, types.ErrAlreadyValidator
 	}
@@ -52,17 +41,45 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 		return nil, types.ErrAlreadyValidator
 	}
 
-	applicationEmptyVote := types.NewVote(msg.Candidate)
-	k.SetApplication(ctx, applicationEmptyVote)
+	// If quorum is 0 the application is immediately approved
+	if k.Quorum(ctx) == 0 {
+		// The validator is directly appended in the validator set
+		k.SetValidator(ctx, msg.Candidate)
+		k.SetValidatorByConsAddr(ctx, msg.Candidate)
 
-	// TODO: Define your msg events
-	// ctx.EventManager().EmitEvent(
-	// 	sdk.NewEvent(
-	// 		sdk.EventTypeMessage,
-	// 		sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
-	// 		sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddr.String()),
-	// 	),
-	// )
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeAppendValidator,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(types.AttributeKeyValidator, msg.Candidate.GetOperator().String()),
+			),
+		)
+	} else {
+		// If quorum is more than 0, we create a application vote
+
+		// Candidate should not be already applying
+		_, found = k.GetApplication(ctx, msg.Candidate.GetOperator())
+		if found {
+			return nil, types.ErrAlreadyApplying
+		}
+		_, found = k.GetApplicationByConsAddr(ctx, msg.Candidate.GetConsAddr())
+		if found {
+			return nil, types.ErrAlreadyApplying
+		}
+
+		// Create the new application
+		applicationEmptyVote := types.NewVote(msg.Candidate)
+		k.SetApplication(ctx, applicationEmptyVote)
+		k.SetApplicationByConsAddr(ctx, applicationEmptyVote)
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeSubmitApplication,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(types.AttributeKeyValidator, msg.Candidate.GetOperator().String()),
+			),
+		)
+	}
 
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
