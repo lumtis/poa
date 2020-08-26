@@ -6,8 +6,14 @@ import (
 )
 
 // MaxValidators - Maximum number of validators
-func (k Keeper) MaxValidators(ctx sdk.Context) (res uint32) {
+func (k Keeper) MaxValidators(ctx sdk.Context) (res uint16) {
 	k.paramspace.Get(ctx, types.KeyMaxValidators, &res)
+	return
+}
+
+// Quorum - Quorum percentage to add or remove validators
+func (k Keeper) Quorum(ctx sdk.Context) (res uint16) {
+	k.paramspace.Get(ctx, types.KeyQuorum, &res)
 	return
 }
 
