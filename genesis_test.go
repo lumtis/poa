@@ -1,9 +1,9 @@
 package poa_test
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -74,11 +74,11 @@ func TestExportGenesis(t *testing.T) {
 
 	exportedGenesis := poa.ExportGenesis(ctx, poaKeeper)
 
-	if !reflect.DeepEqual(exportedGenesis.Params, types.DefaultParams()) {
+	if !cmp.Equal(exportedGenesis.Params, types.DefaultParams()) {
 		t.Errorf("Exported genesis param shoud be: %v, not %v", types.DefaultParams(), exportedGenesis.Params)
 	}
 
-	if !reflect.DeepEqual(exportedGenesis.Validators, []types.Validator{validator}) {
+	if !cmp.Equal(exportedGenesis.Validators, []types.Validator{validator}) {
 		t.Errorf("Exported genesis validators shoud be: %v, not %v", []types.Validator{validator}, exportedGenesis.Validators)
 	}
 }
