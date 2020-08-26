@@ -41,7 +41,7 @@ func NewParams(maxValidators uint16, quorum uint16) Params {
 
 // String implements the stringer interface for Params
 func (p Params) String() string {
-	return fmt.Sprintf("Max validators: %d, quorum: %d%", p.MaxValidators, p.Quorum)
+	return fmt.Sprintf("Max validators: %d, quorum: %d percents", p.MaxValidators, p.Quorum)
 }
 
 // ParamSetPairs - Implements params.ParamSet

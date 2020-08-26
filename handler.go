@@ -25,14 +25,25 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 
 // handleMsgSubmitApplication create a new application to become a validator
 func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgSubmitApplication) (*sdk.Result, error) {
-	// validator should not be already applying
+	// Candidate should not be already applying
 	_, found := k.GetApplication(ctx, msg.Candidate.GetOperator())
 	if found {
 		return nil, types.ErrAlreadyApplying
 	}
+	_, found = k.GetApplicationByConsAddr(ctx, msg.Candidate.GetConsAddr())
+	if found {
+		return nil, types.ErrAlreadyApplying
+	}
 
-	// TODO: Verify the validator doesn't already exist
-	// TODO: Verify maximum number of validator is not reached
+	// Candidate should not be a validator
+	_, found := k.GetValidator(ctx, msg.Candidate.GetOperator())
+	if found {
+		return nil, types.ErrAlreadyValidator
+	}
+	_, found = k.GetValidatorByConsAddr(ctx, msg.Candidate.GetConsAddr())
+	if found {
+		return nil, types.ErrAlreadyValidator
+	}
 
 	applicationEmptyVote := types.NewVote(msg.Candidate)
 	k.SetApplication(ctx, applicationEmptyVote)
