@@ -27,8 +27,8 @@ func ParamKeyTable() params.KeyTable {
 
 // Params - used for initializing default parameter for poa at genesis
 type Params struct {
-	MaxValidators uint16
-	Quorum        uint16
+	MaxValidators uint16 `json:"max_validators"`
+	Quorum        uint16 `json:"quorum"`
 }
 
 // NewParams creates a new Params object
