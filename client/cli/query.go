@@ -30,6 +30,7 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			GetCmdQueryValidator(queryRoute, cdc),
 			GetCmdQueryValidators(queryRoute, cdc),
 			GetCmdQueryParams(queryRoute, cdc),
+			GetCmdQueryApplications(queryRoute, cdc),
 		)...,
 	)
 
@@ -110,6 +111,28 @@ func GetCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			}
 
 			var out types.Params
+			cdc.MustUnmarshalJSON(res, &out)
+			return cliCtx.PrintOutput(out)
+		},
+	}
+}
+
+// GetCmdQueryApplications queries the applications to become a validator
+func GetCmdQueryApplications(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "applications",
+		Short: "Query the applications to become validator",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryApplications), nil)
+			if err != nil {
+				fmt.Printf("could not resolve %s \n", types.QueryApplications)
+				return nil
+			}
+
+			var out []types.Vote
 			cdc.MustUnmarshalJSON(res, &out)
 			return cliCtx.PrintOutput(out)
 		},

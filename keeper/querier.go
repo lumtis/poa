@@ -22,6 +22,9 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case types.QueryParams:
 			return queryParams(ctx, k)
 
+		case types.QueryApplications:
+			return queryApplications(ctx, k)
+
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown poa query endpoint")
 		}
@@ -66,6 +69,18 @@ func queryParams(ctx sdk.Context, k Keeper) ([]byte, error) {
 	params := k.GetParams(ctx)
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+	}
+
+	return res, nil
+}
+
+func queryApplications(ctx sdk.Context, k Keeper) ([]byte, error) {
+	// Get all the applications
+	applications := k.GetAllApplications(ctx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, applications)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}

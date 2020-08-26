@@ -1,45 +1,40 @@
 package types
 
 import (
-	_ "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-/*
 // verify interface at compile time
-var _ sdk.Msg = &Msg<Action>{}
+var _ sdk.Msg = &MsgSubmitApplication{}
 
-// Msg<Action> - struct for unjailing jailed validator
-type Msg<Action> struct {
-	ValidatorAddr sdk.ValAddress `json:"address" yaml:"address"` // address of the validator operator
+// var _ sdk.Msg = &MsgApproveApplication{}
+// var _ sdk.Msg = &MsgRejectApplication{}
+
+type MsgSubmitApplication struct {
+	Candidate Validator `json:"validator"`
 }
 
-// NewMsg<Action> creates a new Msg<Action> instance
-func NewMsg<Action>(validatorAddr sdk.ValAddress) Msg<Action> {
-	return Msg<Action>{
-		ValidatorAddr: validatorAddr,
+func NewMsgSubmitApplication(candidate Validator) MsgSubmitApplication {
+	return MsgSubmitApplication{
+		Candidate: candidate,
 	}
 }
 
-const <action>Const = "<action>"
+const SubmitApplicationConst = "SubmitApplication"
 
-// nolint
-func (msg Msg<Action>) Route() string { return RouterKey }
-func (msg Msg<Action>) Type() string  { return <action>Const }
-func (msg Msg<Action>) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress(msg.ValidatorAddr)}
+func (msg MsgSubmitApplication) Route() string { return RouterKey }
+func (msg MsgSubmitApplication) Type() string  { return SubmitApplicationConst }
+func (msg MsgSubmitApplication) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.Candidate.GetOperator())}
 }
 
 // GetSignBytes gets the bytes for the message signer to sign on
-func (msg Msg<Action>) GetSignBytes() []byte {
+func (msg MsgSubmitApplication) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic validity check for the AnteHandler
-func (msg Msg<Action>) ValidateBasic() error {
-	if msg.ValidatorAddr.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing validator address")
-	}
-	return nil
+func (msg MsgSubmitApplication) ValidateBasic() error {
+	return msg.Candidate.CheckValid()
 }
-*/
