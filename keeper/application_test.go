@@ -106,7 +106,7 @@ func TestRemoveApplication(t *testing.T) {
 	_, foundConsAddr := poaKeeper.GetApplicationByConsAddr(ctx, validator.GetConsAddr())
 
 	if foundApplication || foundConsAddr {
-		t.Errorf("RemoveApplication should remove applicaiton record. Found val: %v, found consAddr: %v", foundApplication, foundConsAddr)
+		t.Errorf("RemoveApplication should remove application record. Found val: %v, found consAddr: %v", foundApplication, foundConsAddr)
 	}
 }
 
