@@ -57,14 +57,28 @@ func TestEndBlocker(t *testing.T) {
 			}
 		case cmp.Equal(update.GetPubKey(), val4Update.GetPubKey()):
 			if update.GetPower() != 0 {
-				t.Errorf("Validator 4 should join")
+				t.Errorf("Validator 4 should leave")
 			}
 		case cmp.Equal(update.GetPubKey(), val5Update.GetPubKey()):
 			if update.GetPower() != 0 {
-				t.Errorf("Validator 5 should join")
+				t.Errorf("Validator 5 should leave")
 			}
 		default:
 			t.Errorf("EndBlocker returns a unknown update: %v", update)
 		}
+	}
+
+	// Check remaining validators in the keeper
+	_, found1 := poaKeeper.GetValidator(ctx, validator1.GetOperator())
+	_, found2 := poaKeeper.GetValidator(ctx, validator2.GetOperator())
+	_, found3 := poaKeeper.GetValidator(ctx, validator3.GetOperator())
+	_, found4 := poaKeeper.GetValidator(ctx, validator4.GetOperator())
+	_, found5 := poaKeeper.GetValidator(ctx, validator5.GetOperator())
+
+	if !found1 || !found2 || !found3 {
+		t.Errorf("EndBlocker should leave validator 1, 2 and 3 in the set: %v, %v, %v", found1, found2, found3)
+	}
+	if found4 || found5 {
+		t.Errorf("EndBlocker should remove validator 4 and 5 from the set: %v, %v", found4, found5)
 	}
 }
