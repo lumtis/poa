@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/ltacker/poa"
+	"github.com/ltacker/poa/types"
 )
 
 func TestGetValidator(t *testing.T) {
@@ -60,6 +61,93 @@ func TestGetValidatorByConsAddr(t *testing.T) {
 	_, found = poaKeeper.GetValidator(ctx, validator2.GetOperator())
 	if found {
 		t.Errorf("GetValidatorByConsAddr should not find validator if it has not been set with SetValidator")
+	}
+}
+
+func TestGetValidatorState(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	validator1, _ := poa.MockValidator()
+	validator2, _ := poa.MockValidator()
+
+	poaKeeper.SetValidatorState(ctx, validator1, types.ValidatorStateJoined)
+
+	// Should find the correct validator
+	retrievedState, found := poaKeeper.GetValidatorState(ctx, validator1.GetOperator())
+	if !found {
+		t.Errorf("GetValidatorState should find validator state if it has been set")
+	}
+
+	if !cmp.Equal(types.ValidatorStateJoined, retrievedState) {
+		t.Errorf("GetValidatorState should find %v, found %v", validator1, types.ValidatorStateJoined)
+	}
+
+	// Should not find a unset validator
+	_, found = poaKeeper.GetValidatorState(ctx, validator2.GetOperator())
+	if found {
+		t.Errorf("GetValidator should not find validator if it has not been set")
+	}
+}
+
+func TestGetValidatorStatePanic(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	validator1, _ := poa.MockValidator()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The function did not panic on an unknown state")
+		}
+	}()
+
+	// Should panic if the state doesn't exist
+	poaKeeper.SetValidatorState(ctx, validator1, 1000)
+}
+
+func TestAppendValidator(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	validator, _ := poa.MockValidator()
+
+	poaKeeper.AppendValidator(ctx, validator)
+
+	_, foundVal := poaKeeper.GetValidator(ctx, validator.GetOperator())
+	_, foundConsAddr := poaKeeper.GetValidatorByConsAddr(ctx, validator.GetConsAddr())
+	_, foundState := poaKeeper.GetValidatorState(ctx, validator.GetOperator())
+
+	if !foundVal || !foundConsAddr || !foundState {
+		t.Errorf("AppendValidator should append the validator. Found val: %v, found consAddr: %v, found state: %v", foundVal, foundConsAddr, foundState)
+	}
+}
+
+func TestRemoveValidator(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	validator1, _ := poa.MockValidator()
+	validator2, _ := poa.MockValidator()
+
+	// Set validators
+	poaKeeper.SetValidator(ctx, validator1)
+	poaKeeper.SetValidatorByConsAddr(ctx, validator1)
+	poaKeeper.SetValidatorState(ctx, validator1, types.ValidatorStateJoining)
+	poaKeeper.SetValidator(ctx, validator2)
+	poaKeeper.SetValidatorByConsAddr(ctx, validator2)
+	poaKeeper.SetValidatorState(ctx, validator2, types.ValidatorStateJoining)
+
+	poaKeeper.RemoveValidator(ctx, validator1.GetOperator())
+
+	// Should not find a removed validator
+	_, foundVal := poaKeeper.GetValidator(ctx, validator1.GetOperator())
+	_, foundConsAddr := poaKeeper.GetValidatorByConsAddr(ctx, validator1.GetConsAddr())
+	_, foundState := poaKeeper.GetValidatorState(ctx, validator1.GetOperator())
+
+	if foundVal || foundConsAddr || foundState {
+		t.Errorf("RemoveValidator should remove validator record. Found val: %v, found consAddr: %v, found state: %v", foundVal, foundConsAddr, foundState)
+	}
+
+	// Should still find a non removed validator
+	_, foundVal = poaKeeper.GetValidator(ctx, validator2.GetOperator())
+	_, foundConsAddr = poaKeeper.GetValidatorByConsAddr(ctx, validator2.GetConsAddr())
+	_, foundState = poaKeeper.GetValidatorState(ctx, validator2.GetOperator())
+
+	if !foundVal || !foundConsAddr || !foundState {
+		t.Errorf("RemoveValidator should not remove validator 2 record. Found val: %v, found consAddr: %v, found state: %v", foundVal, foundConsAddr, foundState)
 	}
 }
 

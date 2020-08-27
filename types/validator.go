@@ -84,7 +84,6 @@ func MustUnmarshalValidator(cdc *codec.Codec, value []byte) Validator {
 	if err != nil {
 		panic(err)
 	}
-
 	return validator
 }
 func UnmarshalValidator(cdc *codec.Codec, value []byte) (v Validator, err error) {
@@ -111,3 +110,10 @@ func NewDescription(moniker, identity, website, securityContact, details string)
 		Details:         details,
 	}
 }
+
+// Validator states
+const (
+	ValidatorStateJoining uint16 = iota // The validator is joining the validator set, it is not yet present in Tendermint validator set
+	ValidatorStateJoined  uint16 = iota // The validator is already present in Tendermind validator set
+	ValidatorStateLeaving uint16 = iota // The validator is leaving the validator set, it will leave Tendermint validator set at the end of the block
+)

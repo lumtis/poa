@@ -32,6 +32,21 @@ func (k Keeper) GetValidatorByConsAddr(ctx sdk.Context, consAddr sdk.ConsAddress
 	return k.GetValidator(ctx, opAddr)
 }
 
+// Get a validator state
+func (k Keeper) GetValidatorState(ctx sdk.Context, addr sdk.ValAddress) (state uint16, found bool) {
+	store := ctx.KVStore(k.storeKey)
+
+	// Search the value
+	value := store.Get(types.GetValidatorStateKey(addr))
+	if value == nil {
+		return state, false
+	}
+
+	// Return the value
+	state = uint16(value[0]) // A single byte represents the state
+	return state, true
+}
+
 // Set validator details
 func (k Keeper) SetValidator(ctx sdk.Context, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
@@ -43,6 +58,42 @@ func (k Keeper) SetValidator(ctx sdk.Context, validator types.Validator) {
 func (k Keeper) SetValidatorByConsAddr(ctx sdk.Context, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.GetValidatorByConsAddrKey(validator.GetConsAddr()), validator.OperatorAddress)
+}
+
+// Set validator state
+func (k Keeper) SetValidatorState(ctx sdk.Context, validator types.Validator, state uint16) {
+	if state != types.ValidatorStateJoining && state != types.ValidatorStateJoined && state != types.ValidatorStateLeaving {
+		panic("Incorrect validator state")
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	bz := []byte{byte(state)} // The state can be encoded in a single byte
+	store.Set(types.GetValidatorStateKey(validator.OperatorAddress), bz)
+}
+
+// Append a validator and set its state to joining
+func (k Keeper) AppendValidator(ctx sdk.Context, validator types.Validator) {
+	k.SetValidator(ctx, validator)
+	k.SetValidatorByConsAddr(ctx, validator)
+	k.SetValidatorState(ctx, validator, types.ValidatorStateJoining)
+}
+
+// Remove the validator
+// This function should only be called by the end blocker to ensure the validator is removed from the Tendermint validator state
+// This function is called by the end blocker when the validator state is leaving
+func (k Keeper) RemoveValidator(ctx sdk.Context, address sdk.ValAddress) {
+	validator, found := k.GetValidator(ctx, address)
+	if !found {
+		return
+	}
+
+	consAddr := validator.GetConsAddr()
+
+	// delete the validator record
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(types.GetValidatorKey(address))
+	store.Delete(types.GetValidatorByConsAddrKey(consAddr))
+	store.Delete(types.GetValidatorStateKey(address))
 }
 
 // Get the set of all validators

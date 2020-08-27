@@ -44,8 +44,7 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 	// If quorum is 0 the application is immediately approved
 	if k.Quorum(ctx) == 0 {
 		// The validator is directly appended in the validator set
-		k.SetValidator(ctx, msg.Candidate)
-		k.SetValidatorByConsAddr(ctx, msg.Candidate)
+		k.AppendValidator(ctx, msg.Candidate)
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(

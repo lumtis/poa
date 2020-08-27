@@ -51,11 +51,18 @@ func TestHandleMsgSubmitApplication(t *testing.T) {
 	}
 	_, found = poaKeeper.GetValidator(ctx, validator.GetOperator())
 	if !found {
-		t.Errorf("NewMsgSubmitApplication with quorum 0 should append validator,, the validator has not been found")
+		t.Errorf("NewMsgSubmitApplication with quorum 0 should append validator, the validator has not been found")
 	}
 	_, found = poaKeeper.GetValidatorByConsAddr(ctx, validator.GetConsAddr())
 	if !found {
-		t.Errorf("NewMsgSubmitApplication with quorum 0 should append validator,, the validator has not been found by cons addr")
+		t.Errorf("NewMsgSubmitApplication with quorum 0 should append validator, the validator has not been found by cons addr")
+	}
+	foundState, found := poaKeeper.GetValidatorState(ctx, validator.GetOperator())
+	if !found {
+		t.Errorf("NewMsgSubmitApplication with quorum 0 should append validator, the validator state has not been found")
+	}
+	if foundState != types.ValidatorStateJoining {
+		t.Errorf("NewMsgSubmitApplication with quorum 0, the validator should have the state joining, if it is appended")
 	}
 
 	// A new applicationcannot be created if the validator already exist
