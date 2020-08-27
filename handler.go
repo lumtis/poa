@@ -85,7 +85,7 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 
 // handleMsgVote handles a vote performed by a validator
 func handleMsgVote(ctx sdk.Context, k keeper.Keeper, msg types.MsgVote) (*sdk.Result, error) {
-	switch msg.Type {
+	switch msg.VoteType {
 	case types.VoteTypeApplication:
 		return handleMsgVoteApplication(ctx, k, msg)
 	default:
@@ -126,8 +126,8 @@ func handleMsgVoteApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgVot
 			sdk.NewEvent(
 				types.EventTypeApproveApplication,
 				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-				sdk.NewAttribute(types.AttributeKeyVoter, msg.VoterAddr),
-				sdk.NewAttribute(types.AttributeKeyCandidate, msg.Candidate.GetOperator().String()),
+				sdk.NewAttribute(types.AttributeKeyVoter, msg.VoterAddr.String()),
+				sdk.NewAttribute(types.AttributeKeyCandidate, msg.CandidateAddr.String()),
 			),
 		)
 	} else {
@@ -135,14 +135,14 @@ func handleMsgVoteApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgVot
 			sdk.NewEvent(
 				types.EventTypeRejectApplication,
 				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-				sdk.NewAttribute(types.AttributeKeyVoter, msg.VoterAddr),
-				sdk.NewAttribute(types.AttributeKeyCandidate, msg.Candidate.GetOperator().String()),
+				sdk.NewAttribute(types.AttributeKeyVoter, msg.VoterAddr.String()),
+				sdk.NewAttribute(types.AttributeKeyCandidate, msg.CandidateAddr.String()),
 			),
 		)
 	}
 
 	// Check if the quorum has been reached
-	reached, approved, err := application.CheckQuorum(validatorCount, k.Quorum())
+	reached, approved, err := application.CheckQuorum(uint64(validatorCount), uint64(k.Quorum(ctx)))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func handleMsgVoteApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgVot
 				sdk.NewEvent(
 					types.EventTypeAppendValidator,
 					sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-					sdk.NewAttribute(types.AttributeKeyCandidate, msg.Candidate.GetOperator().String()),
+					sdk.NewAttribute(types.AttributeKeyCandidate, msg.CandidateAddr.String()),
 				),
 			)
 		} else {
@@ -170,7 +170,7 @@ func handleMsgVoteApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgVot
 				sdk.NewEvent(
 					types.EventTypeRejectValidator,
 					sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-					sdk.NewAttribute(types.AttributeKeyCandidate, msg.Candidate.GetOperator().String()),
+					sdk.NewAttribute(types.AttributeKeyCandidate, msg.CandidateAddr.String()),
 				),
 			)
 		}

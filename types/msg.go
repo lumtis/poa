@@ -7,7 +7,7 @@ import (
 
 // verify interface at compile time
 var _ sdk.Msg = &MsgSubmitApplication{}
-var _ sdk.Msg = &MsgVoteApplication{}
+var _ sdk.Msg = &MsgVote{}
 
 /**
  * MsgSubmitApplication
@@ -46,25 +46,25 @@ func (msg MsgSubmitApplication) ValidateBasic() error {
  */
 
 type MsgVote struct {
-	Type     		uint16 			`json:"type"`
-	VoterAddr     	sdk.ValAddress 	`json:"voter"`
-	CandidateAddr 	sdk.ValAddress 	`json:"candidate"`
-	Approve	 		bool 			`json:"approve"`
+	VoteType      uint16         `json:"type"`
+	VoterAddr     sdk.ValAddress `json:"voter"`
+	CandidateAddr sdk.ValAddress `json:"candidate"`
+	Approve       bool           `json:"approve"`
 }
 
 func NewMsgVote(voteType uint16, voter sdk.ValAddress, candidate sdk.ValAddress, approve bool) MsgVote {
 	return MsgVote{
-		Type: voteType
-		VoterAddr: voter,
+		VoteType:      voteType,
+		VoterAddr:     voter,
 		CandidateAddr: candidate,
-		Approve: approve,
+		Approve:       approve,
 	}
 }
 
 const VoteConst = "Vote"
 
 const (
-	VoteTypeApplication uint16 = iota
+	VoteTypeApplication  uint16 = iota
 	VoteTypeKickProposal uint16 = iota
 )
 
@@ -85,7 +85,7 @@ func (msg MsgVote) ValidateBasic() error {
 	if msg.VoterAddr.Empty() || msg.CandidateAddr.Empty() {
 		return sdkerrors.Wrap(ErrInvalidVoteMsg, "missing address")
 	}
-	if msg.Type != VoteTypeApplication && msg.Type != VoteTypeKickProposal {
+	if msg.VoteType != VoteTypeApplication && msg.VoteType != VoteTypeKickProposal {
 		return sdkerrors.Wrap(ErrInvalidVoteMsg, "vote type incorrect")
 	}
 

@@ -52,6 +52,21 @@ func (k Keeper) AppendApplication(ctx sdk.Context, candidate types.Validator) {
 	k.SetApplicationByConsAddr(ctx, applicationNewVote)
 }
 
+// Remove the application
+func (k Keeper) RemoveApplication(ctx sdk.Context, address sdk.ValAddress) {
+	application, found := k.GetApplication(ctx, address)
+	if !found {
+		return
+	}
+
+	consAddr := application.GetSubject().GetConsAddr()
+
+	// delete the validator record
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(types.GetApplicationKey(address))
+	store.Delete(types.GetApplicationByConsAddrKey(consAddr))
+}
+
 // Get the set of all application
 func (k Keeper) GetAllApplications(ctx sdk.Context) (applications []types.Vote) {
 	store := ctx.KVStore(k.storeKey)

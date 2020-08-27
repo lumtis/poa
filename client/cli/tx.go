@@ -115,9 +115,9 @@ func GetCmdVoteApplication(cdc *codec.Codec) *cobra.Command {
 			// Check if approved or rejected
 			var approved bool
 			if args[1] == "approve" {
-				approved := true
+				approved = true
 			} else if args[1] == "reject" {
-				approved := false
+				approved = false
 			} else {
 				return fmt.Errorf("Vote neither approved nor rejected")
 			}
