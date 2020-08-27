@@ -14,64 +14,16 @@ The poa module emits the following events:
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
-| submit_application | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | submit_application               |
-| message  | sender        | {senderAddress}    |
+| submit_application | candidate     | {validatorAddress} |
+| submit_application | module     | poa |
 
 **If Quorum = 0%:**
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
-| append_validator | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | submit_application               |
-| message  | sender        | {senderAddress}    |
+| append_validator | candidate     | {validatorAddress} |
+| append_validator | module     | poa |
 
-### MsgApproveApplication
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| approve_application | voter     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | approve_application               |
-| message  | sender        | {senderAddress}    |
-
-**If Quorum reached:**
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| append_validator | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | approve_application               |
-| message  | sender        | {senderAddress}    |
-
-### MsgRejectApplication
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| reject_application | voter     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | reject_application               |
-| message  | sender        | {senderAddress}    |
-
-**If Quorum reached for rejection:**
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| reject_validator | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | reject_application               |
-| message  | sender        | {senderAddress}    |
-
-### MsgLeaveValidatorSet
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| leave_validator_set | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | leave_validator_set               |
-| message  | sender        | {senderAddress}    |
 
 ### MsgProposeKick
 
@@ -80,51 +32,91 @@ The poa module emits the following events:
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | propose_kick | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | propose_kick               |
-| message  | sender        | {senderAddress}    |
+| propose_kick | module     | poa |
+
 
 **If Quorum = 0%:**
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | kick_validator | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | propose_kick               |
-| message  | sender        | {senderAddress}    |
+| kick_validator | module     | poa |
 
-### MsgApproveKickProposal
+
+### MsgLeaveValidatorSet
+
+| Type     | Attribute Key | Attribute Value    |
+|----------|---------------|--------------------|
+| leave_validator_set | validator     | {validatorAddress} |
+| leave_validator_set | module     | poa |
+
+
+### MsgVote
+
+#### Approve application
+
+| Type     | Attribute Key | Attribute Value    |
+|----------|---------------|--------------------|
+| approve_application | voter     | {validatorAddress} |
+| approve_application | candidate     | {validatorAddress} |
+| approve_application | module     | poa |
+
+
+**If Quorum reached:**
+
+| Type     | Attribute Key | Attribute Value    |
+|----------|---------------|--------------------|
+| append_validator | candidate     | {validatorAddress} |
+| append_validator | module     | poa |
+
+
+#### Reject application
+
+| Type     | Attribute Key | Attribute Value    |
+|----------|---------------|--------------------|
+| reject_application | voter     | {validatorAddress} |
+| reject_application | candidate     | {validatorAddress} |
+| reject_application | module     | poa |
+
+
+**If Quorum reached for rejection:**
+
+| Type     | Attribute Key | Attribute Value    |
+|----------|---------------|--------------------|
+| reject_validator | candidate     | {validatorAddress} |
+| reject_validator | module     | poa |
+
+
+#### Approve kick proposal
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | approve_kick_proposal | voter     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | approve_kick_proposal               |
-| message  | sender        | {senderAddress}    |
+| approve_kick_proposal | validator     | {validatorAddress} |
+| approve_kick_proposal | module     | poa |
+
 
 **If Quorum reached:**
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | kick_validator | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | approve_kick_proposal               |
-| message  | sender        | {senderAddress}    |
+| kick_validator | module     | poa |
 
-### MsgRejectKickProposal
+
+#### Reject kick proposal
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | reject_kick_proposal | voter     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | reject_kick_proposal               |
-| message  | sender        | {senderAddress}    |
+| reject_kick_proposal | validator     | {validatorAddress} |
+| reject_kick_proposal | module     | poa |
+
 
 **If Quorum reached:**
 
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | keep_validator | validator     | {validatorAddress} |
-| message  | module        | poa               |
-| message  | action        | reject_kick_proposal               |
-| message  | sender        | {senderAddress}    |
+| keep_validator | module     | poa |
+
