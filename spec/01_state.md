@@ -26,11 +26,13 @@ the required lookups for slashing and validator-set updates.
 
 - Validators: `0x21 | OperatorAddr -> amino(validator)`
 - ValidatorsByConsAddr: `0x22 | ConsAddr -> OperatorAddr`
+- ValidatorStates: `0x23 | OperatorAddr -> ValidatorState`
 
 `Validators` is the primary index - it ensures that each operator can have only one
 associated validator, where the public key of that validator can change in the
 future.
 `ValidatorByConsAddr` is an additional index that enables lookups for future uses (like automatic kick for misbehaving).
+`ValidatorStates` holds the state of a validator. The validator can have 3 states: joining, joined or leaving. This state allows the End Blocker to know how to update the Tendermint Core validator state.
 
 Each validator's state is stored in a `Validator` struct:
 
@@ -48,14 +50,20 @@ type Description struct {
     SecurityContact  string // optional email for security contact
     Details          string // optional details
 }
+
+const (
+	ValidatorStateJoining uint16 = iota // The validator is joining the validator set, it is not yet present in Tendermint validator set
+	ValidatorStateJoined  uint16 = iota // The validator is already present in Tendermind validator set
+	ValidatorStateLeaving uint16 = iota // The validator is leaving the validator set, it will leave Tendermint validator set at the end of the block
+)
 ```
 
 ## Application
 
 The application pool tracks all the current applications. An operator can only be one validator, therefore the application can be accessed by the operator address.
 
-- ApplicationPool: `0x23 | OperatorAddr -> amino(vote)`
-- CandidateByConsAddr: `0x24 | ConsAddr -> OperatorAddr`
+- ApplicationPool: `0x24 | OperatorAddr -> amino(vote)`
+- CandidateByConsAddr: `0x25 | ConsAddr -> OperatorAddr`
 
 An application is stored in a `Vote` structure to track the current state of the vote like the current number of approvals. The subject field represents the potential new validator.
 
@@ -74,6 +82,6 @@ type Vote struct {
 
 The kick proposal pool tracks all the current propositions to kick a validator. An operator can only be one validator, therefore the application can be accessed by the operator address.
 
-- KickProposalPool: `0x25 | OperatorAddr -> amino(vote)`
+- KickProposalPool: `0x26 | OperatorAddr -> amino(vote)`
 
 An application is stored in a `Vote` structure to track the current state of the vote like the current number of approvals. The subject field represents the validator to be eventually kicked.

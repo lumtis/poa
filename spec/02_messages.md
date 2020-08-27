@@ -27,60 +27,6 @@ This message is expected to fail if:
 
 This message creates and stores a new `Vote` object in the application pool.
 
-## MsgApproveApplication
-
-An application of a new validator can be approved using the
-`MsgApproveApplication` message.  
-
-```go
-type MsgApproveApplication struct {
-    VoterAddr       sdk.ValAddress
-    CandidateAddr   sdk.ValAddress
-}
-```
-
-This message is expected to fail if:
-
-- the voter has already voted
-- the candidate address is not in the application pool
-
-This message updates the vote status of the application. If the approval quorum is reached, the candidate is appended into the validator set.
-
-## MsgRejectApplication
-
-An application of a new validator can be rejected using the
-`MsgRejectApplication` message.  
-
-```go
-type MsgRejectApplication struct {
-    VoterAddr       sdk.ValAddress
-    CandidateAddr   sdk.ValAddress
-}
-```
-
-This message is expected to fail if:
-
-- the voter has already voted
-- the candidate address is not in the application pool
-
-This message updates the vote status of the application. If the rejection quorum is reached, the candidate is rejected from joining the validator set.
-
-## MsgLeaveValidatorSet
-
-A current validator arbitrarily leaves the validator set using the MsgLeaveValidatorSet message.
-
-```go
-type MsgLeaveValidatorSet struct {
-    ValidatorAddr   sdk.ValAddress
-}
-```
-
-This message is expected to fail if:
-
-- the validator address is not in the validator set
-
-The message removes the validator from the validator set.
-
 ## MsgProposeKick
 
 A new kick proposal to kick a validator is made using the `MsgProposeKick` message.
@@ -98,40 +44,50 @@ This message is expected to fail if:
 
 This message creates and stores a new `Vote` object in the kick proposal pool.
 
-## MsgApproveKickProposal
+## MsgVote
 
-A kick proposal can be approved using the
-`MsgApproveKickProposal` message.  
+MsgVote is a single message that can be used to:
+- Approve the application of a candidate to become a validator
+- Reject the application of a candidate to become a validator
+- Approve a kick proposal to remove a validator
+- Reject a kick proposal to remove a validator
 
 ```go
-type MsgApproveKickProposal struct {
-    VoterAddr       sdk.ValAddress
+type MsgVote struct {
+	VoteType      uint16         `json:"type"`
+	VoterAddr     sdk.ValAddress `json:"voter"`
+	CandidateAddr sdk.ValAddress `json:"candidate"`
+	Approve       bool           `json:"approve"`
+}
+
+const (
+	VoteTypeApplication  uint16 = iota
+	VoteTypeKickProposal uint16 = iota
+)
+```
+
+This message is expected to fail if:
+
+- the voter has already voted
+- the voter is not a validator
+- the candidate address is not in the application pool in case of an application
+- the candidate address is not in the kick proposal pool in case of a kick proposal
+
+In case of an application, this message updates the vote status of the application. If the approval quorum is reached, the candidate is appended into the validator set.
+In case of an kick proposal, this message updates the vote status of the kick proposal. If the approval quorum is reached, the candidate is removed from the validator set.
+
+## MsgLeaveValidatorSet
+
+A current validator arbitrarily leaves the validator set using the MsgLeaveValidatorSet message.
+
+```go
+type MsgLeaveValidatorSet struct {
     ValidatorAddr   sdk.ValAddress
 }
 ```
 
 This message is expected to fail if:
 
-- the voter has already voted
-- the validator address is not in the kick proposal pool
+- the validator address is not in the validator set
 
-This message updates the vote status of the kick proposal. If the approval quorum is reached, the validator is removed from the validator set.
-
-## MsgRejectKickProposal
-
-A kick proposal can be rejected using the
-`MsgRejectKickProposal` message.  
-
-```go
-type MsgRejectApplication struct {
-    VoterAddr       sdk.ValAddress
-    ValidatorAddr   sdk.ValAddress
-}
-```
-
-This message is expected to fail if:
-
-- the voter has already voted
-- the candidate address is not in the kick proposal pool
-
-This message updates the vote status of the application. If the rejection quorum is reached, the validator is not removed from the validator set.
+The message removes the validator from the validator set.
