@@ -34,11 +34,13 @@ A new kick proposal to kick a validator is made using the `MsgProposeKick` messa
 ```go
 type MsgProposeKick struct {
     ValidatorAddr   sdk.ValAddress
+    ProposerAddr    sdfk.ValAddres
 }
 ```
 
 This message is expected to fail if:
 
+- the proposer address is not in the validator set
 - the validator address is not in the validator set
 - the validator address is already in the kick proposal pool
 
