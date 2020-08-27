@@ -3,6 +3,7 @@ module github.com/ltacker/poa
 go 1.13
 
 require (
+	github.com/Workiva/go-datastructures v1.0.52
 	github.com/cosmos/cosmos-sdk v0.39.1
 	github.com/gogo/protobuf v1.3.1
 	github.com/google/go-cmp v0.5.2

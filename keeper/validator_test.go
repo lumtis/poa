@@ -123,12 +123,8 @@ func TestRemoveValidator(t *testing.T) {
 	validator2, _ := poa.MockValidator()
 
 	// Set validators
-	poaKeeper.SetValidator(ctx, validator1)
-	poaKeeper.SetValidatorByConsAddr(ctx, validator1)
-	poaKeeper.SetValidatorState(ctx, validator1, types.ValidatorStateJoining)
-	poaKeeper.SetValidator(ctx, validator2)
-	poaKeeper.SetValidatorByConsAddr(ctx, validator2)
-	poaKeeper.SetValidatorState(ctx, validator2, types.ValidatorStateJoining)
+	poaKeeper.AppendValidator(ctx, validator1)
+	poaKeeper.AppendValidator(ctx, validator2)
 
 	poaKeeper.RemoveValidator(ctx, validator1.GetOperator())
 

@@ -87,3 +87,48 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 
 	return cmd
 }
+
+// GetCmdVoteApplication approves or rejects an application to become validator
+func GetCmdVoteApplication(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "vote-application [candidate-addr] approve|reject",
+		Short: "Approve or reject the application to become a validator",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			// Voter address is the sender
+			accAddress := cliCtx.GetFromAddress()
+			if accAddress.Empty() {
+				return fmt.Errorf("Account address empty")
+			}
+			voterAddress := sdk.ValAddress(accAddress)
+
+			// Get candidate address
+			valAddr, err := sdk.ValAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			// Check if approved or rejected
+			var approved bool
+			if args[1] == "approve" {
+				approved = true
+			} else if args[1] == "reject" {
+				approved = false
+			} else {
+				return fmt.Errorf("Vote neither approved nor rejected")
+			}
+
+			msg := types.NewMsgVote(types.VoteTypeApplication, voterAddress, valAddr, approved)
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+}
