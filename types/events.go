@@ -17,6 +17,7 @@ const (
 	AttributeKeyValidator = "validator"
 	AttributeKeyCandidate = "candidate"
 	AttributeKeyVoter     = "voter"
+	AttributeKeyProposer  = "proposer"
 
 	AttributeValueCategory = ModuleName
 )

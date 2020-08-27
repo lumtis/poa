@@ -33,6 +33,9 @@ var (
 
 	// Prefix for each key to a application index, by pubkey
 	ApplicationByConsAddrKey = []byte{0x25}
+
+	// Prefix for the validator kick proposal pool
+	KickProposalPoolKey = []byte{0x26}
 )
 
 // Get the key for the validator with address
@@ -58,4 +61,9 @@ func GetApplicationKey(operatorAddr sdk.ValAddress) []byte {
 // Get the key for a validator canditate application with pubkey
 func GetApplicationByConsAddrKey(addr sdk.ConsAddress) []byte {
 	return append(ApplicationByConsAddrKey, addr.Bytes()...)
+}
+
+// Get the key for a validator canditate application with pubkey
+func GetKickProposalKey(operatorAddr sdk.ValAddress) []byte {
+	return append(KickProposalPoolKey, operatorAddr.Bytes()...)
 }

@@ -32,6 +32,7 @@ The poa module emits the following events:
 | Type     | Attribute Key | Attribute Value    |
 |----------|---------------|--------------------|
 | propose_kick | validator     | {validatorAddress} |
+| propose_kick | proposer     | {validatorAddress} |
 | propose_kick | module     | poa |
 
 
