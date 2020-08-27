@@ -79,9 +79,9 @@ func MockValidator() (types.Validator, string) {
 	return validator, consPubKey
 }
 
-// Create an account address
-func MockAccAddress() sdk.AccAddress {
+// Create an validator address
+func MockValAddress() sdk.ValAddress {
 	pk := ed25519.GenPrivKey().PubKey()
 	addr := pk.Address()
-	return sdk.AccAddress(addr)
+	return sdk.ValAddress(addr)
 }
