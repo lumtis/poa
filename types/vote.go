@@ -14,7 +14,7 @@ type Vote struct {
 	Subject   Validator        `json:"subject"`
 	Approvals uint64           `json:"approvals"`
 	Total     uint64           `json:"totals"`
-	Voters    []sdk.AccAddress `json:"voter"`
+	Voters    []sdk.ValAddress `json:"voter"`
 }
 
 func NewVote(subject Validator) Vote {
@@ -22,7 +22,7 @@ func NewVote(subject Validator) Vote {
 		Subject:   subject,
 		Approvals: 0,
 		Total:     0,
-		Voters:    []sdk.AccAddress{},
+		Voters:    []sdk.ValAddress{},
 	}
 }
 
@@ -42,7 +42,7 @@ func (v Vote) GetTotal() uint64 {
 }
 
 // Add a vote
-func (v *Vote) AddVote(voter sdk.AccAddress, approve bool) (alreadyVoted bool) {
+func (v *Vote) AddVote(voter sdk.ValAddress, approve bool) (alreadyVoted bool) {
 	// Verify if the voter already voted
 	for _, currentVoter := range v.Voters {
 		if voter.Equals(currentVoter) {

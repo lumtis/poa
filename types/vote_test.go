@@ -9,8 +9,8 @@ import (
 
 func TestAddVote(t *testing.T) {
 	validator, _ := poa.MockValidator()
-	account1 := poa.MockAccAddress()
-	account2 := poa.MockAccAddress()
+	account1 := poa.MockValAddress()
+	account2 := poa.MockValAddress()
 	vote := types.NewVote(validator)
 
 	if vote.GetTotal() != 0 {
@@ -58,11 +58,11 @@ func TestAddVote(t *testing.T) {
 
 func TestCheckQuorum(t *testing.T) {
 	validator, _ := poa.MockValidator()
-	account1 := poa.MockAccAddress()
-	account2 := poa.MockAccAddress()
-	account3 := poa.MockAccAddress()
-	account4 := poa.MockAccAddress()
-	account5 := poa.MockAccAddress()
+	account1 := poa.MockValAddress()
+	account2 := poa.MockValAddress()
+	account3 := poa.MockValAddress()
+	account4 := poa.MockValAddress()
+	account5 := poa.MockValAddress()
 	vote1 := types.NewVote(validator)
 	vote2 := types.NewVote(validator)
 	vote3 := types.NewVote(validator)
