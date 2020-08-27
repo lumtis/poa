@@ -28,6 +28,8 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 	poaTxCmd.AddCommand(flags.PostCommands(
 		GetCmdSubmitApplication(cdc),
+		GetCmdProposeKick(cdc),
+		GetCmdVoteApplication(cdc),
 	)...)
 
 	return poaTxCmd
@@ -86,6 +88,40 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 	_ = cmd.MarkFlagRequired(FlagPubKey)
 
 	return cmd
+}
+
+// GetCmdSubmitApplication sends a new application to become a validator
+func GetCmdProposeKick(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "propose-kick [validator-addr]",
+		Short: "Propose to kick a validator from the validator",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			// Proposer address is the sender
+			accAddress := cliCtx.GetFromAddress()
+			if accAddress.Empty() {
+				return fmt.Errorf("Account address empty")
+			}
+			proposeAddress := sdk.ValAddress(accAddress)
+
+			// Get candidate address
+			candidateAddr, err := sdk.ValAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgProposeKick(candidateAddr, proposeAddress)
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
 }
 
 // GetCmdVoteApplication approves or rejects an application to become validator
