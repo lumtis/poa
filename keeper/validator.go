@@ -79,8 +79,8 @@ func (k Keeper) AppendValidator(ctx sdk.Context, validator types.Validator) {
 }
 
 // Remove the validator
-// This function should only be called by the end blocker to ensure the validator is removed from the Tendermint validator state
-// This function is called by the end blocker when the validator state is leaving
+// !!! This function should only be called by the end blocker to ensure the validator is removed from the Tendermint validator state
+// !!! This function is called by the end blocker when the validator state is leaving
 func (k Keeper) RemoveValidator(ctx sdk.Context, address sdk.ValAddress) {
 	validator, found := k.GetValidator(ctx, address)
 	if !found {

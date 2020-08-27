@@ -8,6 +8,7 @@ import (
 // verify interface at compile time
 var _ sdk.Msg = &MsgSubmitApplication{}
 var _ sdk.Msg = &MsgVote{}
+var _ sdk.Msg = &MsgProposeKick{}
 
 /**
  * MsgSubmitApplication
@@ -39,6 +40,44 @@ func (msg MsgSubmitApplication) GetSignBytes() []byte {
 // ValidateBasic validity check for the AnteHandler
 func (msg MsgSubmitApplication) ValidateBasic() error {
 	return msg.Candidate.CheckValid()
+}
+
+/**
+ * MsgProposeKick
+ */
+
+type MsgProposeKick struct {
+	CandidateAddr sdk.ValAddress `json:"candidate"`
+	ProposerAddr  sdk.ValAddress `json:"proposer"`
+}
+
+func NewMsgProposeKick(candidate sdk.ValAddress, proposer sdk.ValAddress) MsgProposeKick {
+	return MsgProposeKick{
+		CandidateAddr: candidate,
+		ProposerAddr:  proposer,
+	}
+}
+
+const ProposeKickConst = "ProposeKick"
+
+func (msg MsgProposeKick) Route() string { return RouterKey }
+func (msg MsgProposeKick) Type() string  { return ProposeKickConst }
+func (msg MsgProposeKick) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.ProposerAddr)}
+}
+
+// GetSignBytes gets the bytes for the message signer to sign on
+func (msg MsgProposeKick) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// ValidateBasic validity check for the AnteHandler
+func (msg MsgProposeKick) ValidateBasic() error {
+	if msg.ProposerAddr.Empty() || msg.CandidateAddr.Empty() {
+		return sdkerrors.Wrap(ErrInvalidKickProposal, "missing address")
+	}
+	return nil
 }
 
 /**
