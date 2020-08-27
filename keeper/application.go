@@ -45,6 +45,13 @@ func (k Keeper) SetApplicationByConsAddr(ctx sdk.Context, application types.Vote
 	store.Set(types.GetApplicationByConsAddrKey(application.GetSubject().GetConsAddr()), application.GetSubject().GetOperator())
 }
 
+// Append a new application with a new vote
+func (k Keeper) AppendApplication(ctx sdk.Context, candidate types.Validator) {
+	applicationNewVote := types.NewVote(candidate)
+	k.SetApplication(ctx, applicationNewVote)
+	k.SetApplicationByConsAddr(ctx, applicationNewVote)
+}
+
 // Get the set of all application
 func (k Keeper) GetAllApplications(ctx sdk.Context) (applications []types.Vote) {
 	store := ctx.KVStore(k.storeKey)

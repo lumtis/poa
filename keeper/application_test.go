@@ -79,6 +79,37 @@ func TestGetApplicationByConsAddr(t *testing.T) {
 	}
 }
 
+func TestAppendApplication(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	validator, _ := poa.MockValidator()
+
+	poaKeeper.AppendApplication(ctx, validator)
+
+	_, foundApplication := poaKeeper.GetApplication(ctx, validator.GetOperator())
+	_, foundConsAddr := poaKeeper.GetApplicationByConsAddr(ctx, validator.GetConsAddr())
+
+	if !foundApplication || !foundConsAddr {
+		t.Errorf("AppendValidator should append the application. Found val: %v, found consAddr: %v", foundApplication, foundConsAddr)
+	}
+}
+
+func TestRemoveApplication(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	validator, _ := poa.MockValidator()
+
+	// Append  and remove application
+	poaKeeper.AppendApplication(ctx, validator)
+	poaKeeper.RemoveApplication(ctx, validator.GetOperator())
+
+	// Should not find a removed validator
+	_, foundApplication := poaKeeper.GetApplication(ctx, validator.GetOperator())
+	_, foundConsAddr := poaKeeper.GetApplicationByConsAddr(ctx, validator.GetConsAddr())
+
+	if foundApplication || foundConsAddr {
+		t.Errorf("RemoveApplication should remove applicaiton record. Found val: %v, found consAddr: %v", foundVal, foundConsAddr)
+	}
+}
+
 func TestGetAllApplications(t *testing.T) {
 	ctx, poaKeeper := poa.MockContext()
 	validator1, _ := poa.MockValidator()
