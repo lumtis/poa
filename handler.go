@@ -18,6 +18,8 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return handleMsgSubmitApplication(ctx, k, msg)
 		case types.MsgVote:
 			return handleMsgVote(ctx, k, msg)
+		case types.MsgProposeKick:
+			return handleMsgProposeKick(ctx, k, msg)
 		default:
 			errMsg := fmt.Sprintf("unrecognized %s message type: %T", types.ModuleName, msg)
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
@@ -76,6 +78,65 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 				types.EventTypeSubmitApplication,
 				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 				sdk.NewAttribute(types.AttributeKeyCandidate, msg.Candidate.GetOperator().String()),
+			),
+		)
+	}
+
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+}
+
+// handleMsgProposeKick creates a new vote in the kick proposal pools if all conditions are met
+func handleMsgProposeKick(ctx sdk.Context, k keeper.Keeper, msg types.MsgProposeKick) (*sdk.Result, error) {
+	// The proposer must be a validator
+	_, found := k.GetValidator(ctx, msg.ProposerAddr)
+	if !found {
+		return nil, types.ErrProposerNotValidator
+	}
+
+	// Candidate should be a validator
+	candidate, found := k.GetValidator(ctx, msg.CandidateAddr)
+	if !found {
+		return nil, types.ErrNotValidator
+	}
+	// Can't create a kick proposal if the candidate is leaving the validator set
+	valState, found := k.GetValidatorState(ctx, msg.CandidateAddr)
+	if !found {
+		panic("A validator has no state")
+	}
+	if valState == types.ValidatorStateLeaving {
+		return nil, types.ErrValidatorLeaving
+	}
+
+	// If quorum is 0 the candidate is immediatelly kicked from the validator set
+	if k.Quorum(ctx) == 0 {
+		// We set the validator state to leaving, the End Blocker will update the keeper
+		k.SetValidatorState(ctx, candidate, types.ValidatorStateLeaving)
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeKickValidator,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(types.AttributeKeyValidator, msg.CandidateAddr.String()),
+			),
+		)
+	} else {
+		// If quorum is more than 0, we create a kick proposal vote
+
+		// Candidate should not be already in a kick proposal
+		_, found = k.GetKickProposal(ctx, msg.CandidateAddr)
+		if found {
+			return nil, types.ErrAlreadyInKickProposal
+		}
+
+		// Create the new application
+		k.AppendKickProposal(ctx, candidate)
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeProposeKick,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(types.AttributeKeyValidator, msg.CandidateAddr.String()),
+				sdk.NewAttribute(types.AttributeKeyProposer, msg.ProposerAddr.String()),
 			),
 		)
 	}
