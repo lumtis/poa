@@ -31,6 +31,7 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			GetCmdQueryValidators(queryRoute, cdc),
 			GetCmdQueryParams(queryRoute, cdc),
 			GetCmdQueryApplications(queryRoute, cdc),
+			GetCmdQueryKickProposals(queryRoute, cdc),
 		)...,
 	)
 
@@ -129,6 +130,28 @@ func GetCmdQueryApplications(queryRoute string, cdc *codec.Codec) *cobra.Command
 			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryApplications), nil)
 			if err != nil {
 				fmt.Printf("could not resolve %s \n", types.QueryApplications)
+				return nil
+			}
+
+			var out []types.Vote
+			cdc.MustUnmarshalJSON(res, &out)
+			return cliCtx.PrintOutput(out)
+		},
+	}
+}
+
+// GetCmdQueryKickProposals queries the kick proposals to remove a validator
+func GetCmdQueryKickProposals(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "kick-proposals",
+		Short: "Query the kick proposals to remove validator",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryKickProposals), nil)
+			if err != nil {
+				fmt.Printf("could not resolve %s \n", types.QueryKickProposals)
 				return nil
 			}
 
