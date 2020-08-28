@@ -22,4 +22,6 @@ var (
 	ErrProposerNotValidator  = sdkerrors.Register(ModuleName, 15, "the proposer is not a validator")
 	ErrAlreadyInKickProposal = sdkerrors.Register(ModuleName, 16, "the candidate is already in a kick proposal")
 	ErrNoKickProposalFound   = sdkerrors.Register(ModuleName, 17, "no kick proposal found")
+	ErrVoterIsCandidate      = sdkerrors.Register(ModuleName, 18, "the voter cannot be the candidate")
+	ErrProposerIsCandidate   = sdkerrors.Register(ModuleName, 19, "the proposer cannot be the candidate")
 )

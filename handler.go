@@ -87,6 +87,11 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 
 // handleMsgProposeKick creates a new vote in the kick proposal pools if all conditions are met
 func handleMsgProposeKick(ctx sdk.Context, k keeper.Keeper, msg types.MsgProposeKick) (*sdk.Result, error) {
+	// The candidate of the kick proposal can't be the proposer
+	if msg.ProposerAddr.Equals(msg.CandidateAddr) {
+		return nil, types.ErrProposerIsCandidate
+	}
+
 	// The proposer must be a validator
 	_, found := k.GetValidator(ctx, msg.ProposerAddr)
 	if !found {
@@ -149,7 +154,6 @@ func handleMsgVote(ctx sdk.Context, k keeper.Keeper, msg types.MsgVote) (*sdk.Re
 	switch msg.VoteType {
 	case types.VoteTypeApplication:
 		return handleMsgVoteApplication(ctx, k, msg)
-	default:
 	case types.VoteTypeKickProposal:
 		return handleMsgVoteTypeKickProposal(ctx, k, msg)
 	default:
@@ -247,6 +251,11 @@ func handleMsgVoteApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgVot
 }
 
 func handleMsgVoteTypeKickProposal(ctx sdk.Context, k keeper.Keeper, msg types.MsgVote) (*sdk.Result, error) {
+	// The candidate of the kick proposal can't be the voter
+	if msg.VoterAddr.Equals(msg.CandidateAddr) {
+		return nil, types.ErrVoterIsCandidate
+	}
+
 	// The voter must be a validator
 	_, found := k.GetValidator(ctx, msg.VoterAddr)
 	if !found {
@@ -291,7 +300,8 @@ func handleMsgVoteTypeKickProposal(ctx sdk.Context, k keeper.Keeper, msg types.M
 	validatorCount := len(allValidators)
 
 	// Check if the quorum has been reached
-	reached, approved, err := kickProposal.CheckQuorum(uint64(validatorCount), uint64(k.Quorum(ctx)))
+	// We decrement validator count, the candidate of the kick proposal cannot vote
+	reached, approved, err := kickProposal.CheckQuorum(uint64(validatorCount)-1, uint64(k.Quorum(ctx)))
 	if err != nil {
 		return nil, err
 	}
