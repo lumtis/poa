@@ -389,3 +389,48 @@ func TestHandleMsgVoteKickProposal(t *testing.T) {
 		t.Errorf("MsgVoteKickProposal with 1/2 reject should not add one approve to the kick proposal")
 	}
 }
+
+func testHandleMsgLeaveValidatorSet(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	handler := poa.NewHandler(poaKeeper)
+	validator1, _ := poa.MockValidator()
+	validator2, _ := poa.MockValidator()
+	poaKeeper.SetParams(ctx, types.DefaultParams())
+
+	poaKeeper.AppendValidator(ctx, validator1)
+
+	// Can't leave the validator set if only one validator
+	msg := types.NewMsgLeaveValidatorSet(validator1.GetOperator())
+	_, err := handler(ctx, msg)
+	if err.Error() != types.ErrOnlyOneValidator.Error() {
+		t.Errorf("MsgLeaveValidatorSet with one validator, error should be %v, got %v", types.ErrOnlyOneValidator.Error(), err.Error())
+	}
+
+	// Can't leave the validator set if not validator
+	msg = types.NewMsgLeaveValidatorSet(validator2.GetOperator())
+	_, err = handler(ctx, msg)
+	if err.Error() != types.ErrNotValidator.Error() {
+		t.Errorf("MsgLeaveValidatorSet when not validator, error should be %v, got %v", types.ErrNotValidator.Error(), err.Error())
+	}
+
+	poaKeeper.AppendValidator(ctx, validator2)
+	poaKeeper.AppendKickProposal(ctx, validator1)
+
+	// Can leave the validator set
+	msg = types.NewMsgLeaveValidatorSet(validator1.GetOperator())
+	_, err = handler(ctx, msg)
+	if err != nil {
+		t.Errorf("MsgLeaveValidatorSet should leave the validator set, got error %v", err)
+	}
+	_, found := poaKeeper.GetKickProposal(ctx, validator1.GetOperator())
+	if found {
+		t.Errorf("MsgLeaveValidatorSet should remove existing kick proposal")
+	}
+	validatorState, found := poaKeeper.GetValidatorState(ctx, validator1.GetOperator())
+	if !found {
+		t.Errorf("MsgLeaveValidatorSet should not directly remove the validator")
+	}
+	if validatorState != types.ValidatorStateLeaving {
+		t.Errorf("MsgLeaveValidatorSet should set the state of the validator to leaving")
+	}
+}
