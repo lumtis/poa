@@ -87,6 +87,11 @@ func handleMsgSubmitApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgS
 
 // handleMsgProposeKick creates a new vote in the kick proposal pools if all conditions are met
 func handleMsgProposeKick(ctx sdk.Context, k keeper.Keeper, msg types.MsgProposeKick) (*sdk.Result, error) {
+	// The candidate of the kick proposal can't be the proposer
+	if msg.ProposerAddr.Equals(msg.CandidateAddr) {
+		return nil, types.ErrProposerIsCandidate
+	}
+
 	// The proposer must be a validator
 	_, found := k.GetValidator(ctx, msg.ProposerAddr)
 	if !found {
@@ -149,6 +154,8 @@ func handleMsgVote(ctx sdk.Context, k keeper.Keeper, msg types.MsgVote) (*sdk.Re
 	switch msg.VoteType {
 	case types.VoteTypeApplication:
 		return handleMsgVoteApplication(ctx, k, msg)
+	case types.VoteTypeKickProposal:
+		return handleMsgVoteTypeKickProposal(ctx, k, msg)
 	default:
 		return nil, types.ErrInvalidVoteMsg
 	}
@@ -238,6 +245,98 @@ func handleMsgVoteApplication(ctx sdk.Context, k keeper.Keeper, msg types.MsgVot
 	} else {
 		// Quorum has not been reached yet, update the vote
 		k.SetApplication(ctx, application)
+	}
+
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+}
+
+func handleMsgVoteTypeKickProposal(ctx sdk.Context, k keeper.Keeper, msg types.MsgVote) (*sdk.Result, error) {
+	// The candidate of the kick proposal can't be the voter
+	if msg.VoterAddr.Equals(msg.CandidateAddr) {
+		return nil, types.ErrVoterIsCandidate
+	}
+
+	// The voter must be a validator
+	_, found := k.GetValidator(ctx, msg.VoterAddr)
+	if !found {
+		return nil, types.ErrVoterNotValidator
+	}
+
+	// Check the kick proposal exist
+	kickProposal, found := k.GetKickProposal(ctx, msg.CandidateAddr)
+	if !found {
+		return nil, types.ErrNoKickProposalFound
+	}
+
+	// Check if already voted and vote
+	alreadyVoted := kickProposal.AddVote(msg.VoterAddr, msg.Approve)
+	if alreadyVoted {
+		return nil, types.ErrAlreadyVoted
+	}
+
+	// Emit the vote event
+	if msg.Approve {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeApproveKickProposal,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(types.AttributeKeyVoter, msg.VoterAddr.String()),
+				sdk.NewAttribute(types.AttributeKeyValidator, msg.CandidateAddr.String()),
+			),
+		)
+	} else {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeRejectKickProposal,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+				sdk.NewAttribute(types.AttributeKeyVoter, msg.VoterAddr.String()),
+				sdk.NewAttribute(types.AttributeKeyValidator, msg.CandidateAddr.String()),
+			),
+		)
+	}
+
+	// Get validator count
+	allValidators := k.GetAllValidators(ctx)
+	validatorCount := len(allValidators)
+
+	// Check if the quorum has been reached
+	// We decrement validator count, the candidate of the kick proposal cannot vote
+	reached, approved, err := kickProposal.CheckQuorum(uint64(validatorCount)-1, uint64(k.Quorum(ctx)))
+	if err != nil {
+		return nil, err
+	}
+
+	if reached {
+		if approved {
+			// The validator leave the validator set
+			// The state is set to leave, End Blocker will remove definitely the validator
+			k.RemoveKickProposal(ctx, msg.CandidateAddr)
+			k.SetValidatorState(ctx, kickProposal.GetSubject(), types.ValidatorStateLeaving)
+
+			// Emit approved event
+			ctx.EventManager().EmitEvent(
+				sdk.NewEvent(
+					types.EventTypeKickValidator,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+					sdk.NewAttribute(types.AttributeKeyValidator, msg.CandidateAddr.String()),
+				),
+			)
+		} else {
+			// Kick proposal rejected, validator is not removed
+			k.RemoveKickProposal(ctx, msg.CandidateAddr)
+
+			// Emit rejected event
+			ctx.EventManager().EmitEvent(
+				sdk.NewEvent(
+					types.EventTypeKeepValidator,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+					sdk.NewAttribute(types.AttributeKeyValidator, msg.CandidateAddr.String()),
+				),
+			)
+		}
+	} else {
+		// Quorum has not been reached yet, update the vote
+		k.SetKickProposal(ctx, kickProposal)
 	}
 
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil

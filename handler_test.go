@@ -90,9 +90,16 @@ func TestHandleMsgProposeKick(t *testing.T) {
 	poaKeeper.AppendValidator(ctx, validator1)
 	poaKeeper.AppendValidator(ctx, validator2)
 
-	// The kick proposal is created correctly
-	msg := types.NewMsgProposeKick(validator1.GetOperator(), validator2.GetOperator())
+	// Cannot propose to kick oneself
+	msg := types.NewMsgProposeKick(validator1.GetOperator(), validator1.GetOperator())
 	_, err := handler(ctx, msg)
+	if err.Error() != types.ErrProposerIsCandidate.Error() {
+		t.Errorf("MsgProposeKick with same address, error should be %v, got %v", types.ErrProposerIsCandidate.Error(), err.Error())
+	}
+
+	// The kick proposal is created correctly
+	msg = types.NewMsgProposeKick(validator1.GetOperator(), validator2.GetOperator())
+	_, err = handler(ctx, msg)
 	if err != nil {
 		t.Errorf("MsgProposeKick should create a kick proposal, got error %v", err)
 	}
@@ -263,5 +270,122 @@ func TestHandleMsgVoteApplication(t *testing.T) {
 	_, err = handler(ctx, msg)
 	if err.Error() != types.ErrMaxValidatorsReached.Error() {
 		t.Errorf("MsgVoteApplication should fail with %v, got %v", types.ErrMaxValidatorsReached, err)
+	}
+}
+
+func TestHandleMsgVoteKickProposal(t *testing.T) {
+	ctx, poaKeeper := poa.MockContext()
+	handler := poa.NewHandler(poaKeeper)
+	voter1, _ := poa.MockValidator()
+	voter2, _ := poa.MockValidator()
+	validator1, _ := poa.MockValidator()
+	poaKeeper.SetParams(ctx, types.NewParams(15, 100)) // Set quorum to 100%
+
+	// Add voter to validator set
+	poaKeeper.AppendValidator(ctx, voter1)
+	poaKeeper.AppendValidator(ctx, voter2)
+	poaKeeper.AppendValidator(ctx, validator1)
+
+	// Cannot vote if no kick proposal
+	msg := types.NewMsgVote(types.VoteTypeKickProposal, voter1.GetOperator(), validator1.GetOperator(), true)
+	_, err := handler(ctx, msg)
+	if err.Error() != types.ErrNoKickProposalFound.Error() {
+		t.Errorf("MsgVoteKickProposal with no kick proposal, error should be %v, got %v", types.ErrNoKickProposalFound.Error(), err.Error())
+	}
+
+	// Create a kick proposal
+	poaKeeper.AppendKickProposal(ctx, validator1)
+
+	// Cannot vote to kick oneself
+	msg = types.NewMsgVote(types.VoteTypeKickProposal, validator1.GetOperator(), validator1.GetOperator(), true)
+	_, err = handler(ctx, msg)
+	if err.Error() != types.ErrVoterIsCandidate.Error() {
+		t.Errorf("MsgVoteKickProposal with same address, error should be %v, got %v", types.ErrVoterIsCandidate.Error(), err.Error())
+	}
+
+	// Can vote a kick proposal
+	msg = types.NewMsgVote(types.VoteTypeKickProposal, voter1.GetOperator(), validator1.GetOperator(), true)
+	_, err = handler(ctx, msg)
+	if err != nil {
+		t.Errorf("MsgVoteKickProposal should vote on a kick proposal, got error %v", err)
+	}
+	_, found := poaKeeper.GetValidator(ctx, validator1.GetOperator())
+	if !found {
+		t.Errorf("MsgVoteKickProposal with 1/2 approve should not remove the validator")
+	}
+	kickProposal, found := poaKeeper.GetKickProposal(ctx, validator1.GetOperator())
+	if !found {
+		t.Errorf("MsgVoteKickProposal with 1/2 approve should not remove the kick proposal")
+	}
+	if kickProposal.GetTotal() != 1 {
+		t.Errorf("MsgVoteKickProposal with approve should add one vote to the kick proposal")
+	}
+	if kickProposal.GetApprovals() != 1 {
+		t.Errorf("MsgVoteKickProposal with approve should add one approve to the kick proposal")
+	}
+
+	// Second approve should set the set of the validator to leaving
+	msg = types.NewMsgVote(types.VoteTypeKickProposal, voter2.GetOperator(), validator1.GetOperator(), true)
+	_, err = handler(ctx, msg)
+	if err != nil {
+		t.Errorf("MsgVoteKickProposal 2 should vote on a kick proposal, got error %v", err)
+	}
+	_, found = poaKeeper.GetKickProposal(ctx, validator1.GetOperator())
+	if found {
+		t.Errorf("MsgVoteKickProposal with 2/2 approve should remove the kick proposal")
+	}
+	validatorState, found := poaKeeper.GetValidatorState(ctx, validator1.GetOperator())
+	if !found {
+		t.Errorf("MsgVoteKickProposal with 2/2 approve should not directly remove the validator from the validator set")
+	}
+	if validatorState != types.ValidatorStateLeaving {
+		t.Errorf("MsgVoteKickProposal with 2/2 approve should set the state of the validator to leaving")
+	}
+
+	// Quorum 100%: one reject is sufficient to reject the kick proposal
+	poaKeeper.AppendKickProposal(ctx, voter2)
+	msg = types.NewMsgVote(types.VoteTypeKickProposal, voter1.GetOperator(), voter2.GetOperator(), false)
+	_, err = handler(ctx, msg)
+	if err != nil {
+		t.Errorf("MsgVoteKickProposal 3 should vote on a kick proposal, got error %v", err)
+	}
+	_, found = poaKeeper.GetKickProposal(ctx, voter2.GetOperator())
+	if found {
+		t.Errorf("MsgVoteKickProposal with 1 reject should reject the kick proposal")
+	}
+	validatorState, found = poaKeeper.GetValidatorState(ctx, voter2.GetOperator())
+	if !found {
+		t.Errorf("MsgVoteKickProposal kick proposal rejected should not remove the validator")
+	}
+	if validatorState == types.ValidatorStateLeaving {
+		t.Errorf("MsgVoteKickProposal kick proposal rejected should not set the state of the validator to leaving")
+	}
+
+	// Reapply and set quorum to 1%
+	poaKeeper.AppendKickProposal(ctx, voter2)
+	poaKeeper.SetParams(ctx, types.NewParams(15, 1))
+
+	// One reject should update the vote but not reject totally the kick proposal
+	msg = types.NewMsgVote(types.VoteTypeKickProposal, voter1.GetOperator(), voter2.GetOperator(), false)
+	_, err = handler(ctx, msg)
+	if err != nil {
+		t.Errorf("MsgVoteKickProposal 4 should vote on a kick proposal, got error %v", err)
+	}
+	kickProposal, found = poaKeeper.GetKickProposal(ctx, voter2.GetOperator())
+	if !found {
+		t.Errorf("MsgVoteKickProposal with 1/2 reject should not remove the kick proposal")
+	}
+	_, found = poaKeeper.GetValidatorState(ctx, voter2.GetOperator())
+	if !found {
+		t.Errorf("MsgVoteKickProposal with 1/2 rejec should not remove the validator")
+	}
+	if validatorState == types.ValidatorStateLeaving {
+		t.Errorf("MsgVoteKickProposal with 1/2 rejec should not set the state of the validator to leaving")
+	}
+	if kickProposal.GetTotal() != 1 {
+		t.Errorf("MsgVoteKickProposal with 1/2 reject should add one vote to the kick proposal")
+	}
+	if kickProposal.GetApprovals() != 0 {
+		t.Errorf("MsgVoteKickProposal with 1/2 reject should not add one approve to the kick proposal")
 	}
 }
