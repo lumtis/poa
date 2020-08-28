@@ -25,6 +25,9 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case types.QueryApplications:
 			return queryApplications(ctx, k)
 
+		case types.QueryKickProposals:
+			return queryKickProposals(ctx, k)
+
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown poa query endpoint")
 		}
@@ -81,6 +84,18 @@ func queryApplications(ctx sdk.Context, k Keeper) ([]byte, error) {
 	applications := k.GetAllApplications(ctx)
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, applications)
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+	}
+
+	return res, nil
+}
+
+func queryKickProposals(ctx sdk.Context, k Keeper) ([]byte, error) {
+	// Get all the kick proposals
+	kickProposals := k.GetAllKickProposals(ctx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, kickProposals)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
