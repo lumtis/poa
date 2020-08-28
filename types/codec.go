@@ -9,6 +9,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgSubmitApplication{}, "poa/MsgSubmitApplication", nil)
 	cdc.RegisterConcrete(MsgVote{}, "poa/MsgVote", nil)
 	cdc.RegisterConcrete(MsgProposeKick{}, "poa/MsgProposeKick", nil)
+	cdc.RegisterConcrete(MsgLeaveValidatorSet{}, "poa/MsgLeaveValidatorSet", nil)
 }
 
 // ModuleCdc defines the module codec

@@ -9,6 +9,7 @@ import (
 var _ sdk.Msg = &MsgSubmitApplication{}
 var _ sdk.Msg = &MsgVote{}
 var _ sdk.Msg = &MsgProposeKick{}
+var _ sdk.Msg = &MsgLeaveValidatorSet{}
 
 /**
  * MsgSubmitApplication
@@ -85,7 +86,7 @@ func (msg MsgProposeKick) ValidateBasic() error {
  */
 
 type MsgVote struct {
-	VoteType      uint16         `json:"type"`
+	VoteType      uint16         `json:"votetype"`
 	VoterAddr     sdk.ValAddress `json:"voter"`
 	CandidateAddr sdk.ValAddress `json:"candidate"`
 	Approve       bool           `json:"approve"`
@@ -126,6 +127,43 @@ func (msg MsgVote) ValidateBasic() error {
 	}
 	if msg.VoteType != VoteTypeApplication && msg.VoteType != VoteTypeKickProposal {
 		return sdkerrors.Wrap(ErrInvalidVoteMsg, "vote type incorrect")
+	}
+
+	return nil
+}
+
+/**
+ * MsgLeaveValidatorSet
+ */
+
+type MsgLeaveValidatorSet struct {
+	ValidatorAddr sdk.ValAddress `json:"validator"`
+}
+
+func NewMsgLeaveValidatorSet(validatorAddr sdk.ValAddress) MsgLeaveValidatorSet {
+	return MsgLeaveValidatorSet{
+		ValidatorAddr: validatorAddr,
+	}
+}
+
+const LeaveValidatorSetConst = "LeaveValidatorSet"
+
+func (msg MsgLeaveValidatorSet) Route() string { return RouterKey }
+func (msg MsgLeaveValidatorSet) Type() string  { return LeaveValidatorSetConst }
+func (msg MsgLeaveValidatorSet) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.ValidatorAddr)}
+}
+
+// GetSignBytes gets the bytes for the message signer to sign on
+func (msg MsgLeaveValidatorSet) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// ValidateBasic validity check for the AnteHandler
+func (msg MsgLeaveValidatorSet) ValidateBasic() error {
+	if msg.ValidatorAddr.Empty() {
+		return sdkerrors.Wrap(ErrInvalidValidator, "missing address")
 	}
 
 	return nil

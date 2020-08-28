@@ -30,6 +30,8 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		GetCmdSubmitApplication(cdc),
 		GetCmdProposeKick(cdc),
 		GetCmdVoteApplication(cdc),
+		GetCmdVoteKickProposal(cdc),
+		GetCmdLeaveValidatorSet(cdc),
 	)...)
 
 	return poaTxCmd
@@ -90,7 +92,7 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 	return cmd
 }
 
-// GetCmdSubmitApplication sends a new application to become a validator
+// GetCmdProposeKick sends a new kick proposal to remove a validator
 func GetCmdProposeKick(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "propose-kick [validator-addr]",
@@ -205,6 +207,34 @@ func GetCmdVoteKickProposal(cdc *codec.Codec) *cobra.Command {
 
 			msg := types.NewMsgVote(types.VoteTypeKickProposal, voterAddress, valAddr, approved)
 			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+}
+
+// GetCmdLeaveValidatorSet remove oneself from the validator set
+func GetCmdLeaveValidatorSet(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "leave-validator-set",
+		Short: "Instantly leave the validator set",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			// Validator address is the sender
+			accAddress := cliCtx.GetFromAddress()
+			if accAddress.Empty() {
+				return fmt.Errorf("Account address empty")
+			}
+			validatorAddress := sdk.ValAddress(accAddress)
+
+			msg := types.NewMsgLeaveValidatorSet(validatorAddress)
+			err := msg.ValidateBasic()
 			if err != nil {
 				return err
 			}

@@ -90,6 +90,7 @@ type MsgLeaveValidatorSet struct {
 
 This message is expected to fail if:
 
+- the validator is the only validator of the set
 - the validator address is not in the validator set
 
 The message removes the validator from the validator set.
