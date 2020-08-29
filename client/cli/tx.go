@@ -40,7 +40,7 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 // GetCmdSubmitApplication sends a new application to become a validator
 func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "apply",
+		Use:   "apply [validator-consensus-pubkey]",
 		Short: "Apply to become a new validator in the network",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
@@ -56,9 +56,9 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 			opAddress := sdk.ValAddress(accAddress)
 
 			// Consensus public key for the validator
-			pkStr, err := cmd.Flags().GetString(FlagPubKey)
+			pkStr, err := cmd.Flags().GetString(args[0])
 			if err != nil {
-				return fmt.Errorf("Cannot get pubkey flag: %v", err)
+				return fmt.Errorf("Cannot get pubkey: %v", err)
 			}
 			pk, err := sdk.GetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, pkStr)
 			if err != nil {
@@ -86,8 +86,6 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 	}
 
 	cmd.Flags().AddFlagSet(FlagSetDescriptionCreate())
-	cmd.Flags().AddFlagSet(FlagSetPubKey())
-	_ = cmd.MarkFlagRequired(FlagPubKey)
 
 	return cmd
 }
