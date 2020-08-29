@@ -42,6 +42,7 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply [validator-consensus-pubkey]",
 		Short: "Apply to become a new validator in the network",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			inBuf := bufio.NewReader(cmd.InOrStdin())
@@ -56,11 +57,7 @@ func GetCmdSubmitApplication(cdc *codec.Codec) *cobra.Command {
 			opAddress := sdk.ValAddress(accAddress)
 
 			// Consensus public key for the validator
-			pkStr, err := cmd.Flags().GetString(args[0])
-			if err != nil {
-				return fmt.Errorf("Cannot get pubkey: %v", err)
-			}
-			pk, err := sdk.GetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, pkStr)
+			pk, err := sdk.GetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, args[0])
 			if err != nil {
 				return fmt.Errorf("Cannot convert pubkey: %v", err)
 			}
