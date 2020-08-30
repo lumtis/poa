@@ -12,7 +12,3 @@ type ParamSubspace interface {
 	GetParamSet(ctx sdk.Context, ps params.ParamSet)
 	SetParamSet(ctx sdk.Context, ps params.ParamSet)
 }
-
-// AccountKeeper defines the expected account keeper (noalias)
-type AccountKeeper interface {
-}

@@ -6,7 +6,6 @@ import (
 
 const (
 	FlagAddressValidator = "validator"
-	FlagPubKey           = "pubkey"
 
 	FlagMoniker         = "moniker"
 	FlagIdentity        = "identity"
@@ -33,11 +32,5 @@ func FlagSetDescriptionCreate() *flag.FlagSet {
 	fs.String(FlagSecurityContact, "", "The validator's (optional) security contact email")
 	fs.String(FlagDetails, "", "The validator's (optional) details")
 
-	return fs
-}
-
-func FlagSetPubKey() *flag.FlagSet {
-	fs := flag.NewFlagSet("", flag.ContinueOnError)
-	fs.String(FlagPubKey, "", "The Bech32 encoded PubKey of the validator")
 	return fs
 }
