@@ -13,8 +13,8 @@ and defines the overall functioning of the staking module.
 
 ```go
 type Params struct {
-    MaxValidators   uint16          // Maximum number of validators
-    Quorum          crypto.PubKey   // The percentage of validator approvals to reach to vote a decision (new validator or kick)
+    MaxValidators   uint16         // Maximum number of validators
+    Quorum          uint16	   // The percentage of validator approvals to reach to vote a decision (new validator or kick)
 }
 ```
 
