@@ -25,6 +25,5 @@ For example: if the quorum is 50% and the current validator set contains 10 vali
 1. **[State](01_state.md)**
 2. **[Messages](02_messages.md)**
 3. **[End-Block ](03_end_block.md)**
-4. **[Hooks](04_hooks.md)**
-5. **[Events](05_events.md)**
-6. **[Parameters](06_params.md)**
+4. **[Events](04_events.md)**
+5. **[Parameters](05_params.md)**
